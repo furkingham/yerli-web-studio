@@ -1,0 +1,211 @@
+﻿'use client';
+
+import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { products, categories, type StockStatus, type Voltage, type MotorType } from '../../data/products';
+import ProductCard from '../../components/ProductCard';
+import { ChevronRight, Slash } from 'lucide-react';
+
+const stockOptions: StockStatus[] = ['Stokta Var', 'Kritik Stok', 'Tükendi'];
+const voltageOptions: Voltage[] = ['12V', '18V', '24V'];
+const motorOptions: MotorType[] = ['Kömürsüz', 'Kömürlü'];
+
+export default function CategoryPage() {
+  const searchParams = useSearchParams();
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedVoltages, setSelectedVoltages] = useState<Voltage[]>([]);
+  const [selectedMotorTypes, setSelectedMotorTypes] = useState<MotorType[]>([]);
+  const [selectedStock, setSelectedStock] = useState<StockStatus[]>([]);
+  const [selectedCapacities, setSelectedCapacities] = useState<number[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  useEffect(() => {
+    const categoryParam = searchParams.get('category') || '';
+    const searchParam = searchParams.get('search') || '';
+    setSelectedCategories(categoryParam ? [categoryParam] : []);
+    setSearchTerm(searchParam);
+  }, [searchParams]);
+
+  const filteredProducts = useMemo(() => {
+    return products.filter((product) => {
+      const matchCategory = selectedCategories.length === 0 || selectedCategories.includes(product.category);
+      const matchVoltage = selectedVoltages.length === 0 || selectedVoltages.includes(product.voltage);
+      const matchMotor = selectedMotorTypes.length === 0 || selectedMotorTypes.includes(product.motorType);
+      const matchStock = selectedStock.length === 0 || selectedStock.includes(product.stockStatus);
+      const matchCapacity = selectedCapacities.length === 0 || selectedCapacities.includes(product.batteryCapacity);
+      const matchSearch =
+        searchTerm.length === 0 ||
+        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.description.toLowerCase().includes(searchTerm.toLowerCase());
+
+      return matchCategory && matchVoltage && matchMotor && matchStock && matchCapacity && matchSearch;
+    });
+  }, [selectedCategories, selectedVoltages, selectedMotorTypes, selectedStock, selectedCapacities, searchTerm]);
+
+  const toggleSelection = <T extends string | number>(value: T, state: Array<T>, setter: (value: Array<T>) => void) => {
+    const next = state.includes(value) ? state.filter((item) => item !== value) : [...state, value];
+    setter(next);
+  };
+
+  const clearFilters = () => {
+    setSelectedCategories([]);
+    setSelectedVoltages([]);
+    setSelectedMotorTypes([]);
+    setSelectedStock([]);
+    setSelectedCapacities([]);
+    setSearchTerm('');
+  };
+
+  return (
+    <div className="grid gap-8 lg:grid-cols-[300px_1fr]">
+      <aside className="rounded-[28px] border border-white/10 bg-[#141414] p-6 shadow-industrial">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <h1 className="text-xl font-semibold text-white">Filtreler</h1>
+            <p className="mt-2 text-sm text-slate-400">Teknik özelliklere göre anında daraltın.</p>
+          </div>
+          <button
+            type="button"
+            onClick={clearFilters}
+            className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs uppercase tracking-[0.18em] text-slate-300 transition hover:border-milwaukee hover:text-white"
+          >
+            <Slash className="h-3.5 w-3.5" /> Temizle
+          </button>
+        </div>
+
+        <div className="mt-8 space-y-6">
+          <fieldset>
+            <legend className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-400">Kategori</legend>
+            <div className="mt-4 space-y-3">
+              {categories.map((category) => (
+                <button
+                  key={category}
+                  type="button"
+                  onClick={() => toggleSelection(category, selectedCategories, setSelectedCategories)}
+                  className={`flex w-full items-center justify-between rounded-3xl border px-4 py-4 text-left text-sm transition ${
+                    selectedCategories.includes(category)
+                      ? 'border-milwaukee bg-milwaukee/10 text-white'
+                      : 'border-white/10 bg-white/5 text-slate-300 hover:border-milwaukee/30 hover:bg-white/10'
+                  }`}
+                >
+                  <span>{category}</span>
+                  <ChevronRight className="h-4 w-4 text-slate-400" />
+                </button>
+              ))}
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-400">Voltaj</legend>
+            <div className="mt-4 space-y-3">
+              {voltageOptions.map((voltage) => (
+                <button
+                  key={voltage}
+                  type="button"
+                  onClick={() => toggleSelection(voltage, selectedVoltages, setSelectedVoltages)}
+                  className={`flex w-full items-center justify-between rounded-3xl border px-4 py-3 text-sm transition ${
+                    selectedVoltages.includes(voltage)
+                      ? 'border-milwaukee bg-milwaukee/10 text-white'
+                      : 'border-white/10 bg-white/5 text-slate-300 hover:border-milwaukee/30 hover:bg-white/10'
+                  }`}
+                >
+                  <span>{voltage}</span>
+                  <ChevronRight className="h-4 w-4 text-slate-400" />
+                </button>
+              ))}
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-400">Motor Tipi</legend>
+            <div className="mt-4 space-y-3">
+              {motorOptions.map((motor) => (
+                <button
+                  key={motor}
+                  type="button"
+                  onClick={() => toggleSelection(motor, selectedMotorTypes, setSelectedMotorTypes)}
+                  className={`flex w-full items-center justify-between rounded-3xl border px-4 py-3 text-sm transition ${
+                    selectedMotorTypes.includes(motor)
+                      ? 'border-milwaukee bg-milwaukee/10 text-white'
+                      : 'border-white/10 bg-white/5 text-slate-300 hover:border-milwaukee/30 hover:bg-white/10'
+                  }`}
+                >
+                  <span>{motor}</span>
+                  <ChevronRight className="h-4 w-4 text-slate-400" />
+                </button>
+              ))}
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-400">Akü Kapasitesi</legend>
+            <div className="mt-4 space-y-3">
+              {[...new Set(products.map((product) => product.batteryCapacity))]
+                .sort((a, b) => a - b)
+                .map((capacity) => (
+                  <button
+                    key={capacity}
+                    type="button"
+                    onClick={() => toggleSelection(capacity, selectedCapacities, setSelectedCapacities)}
+                    className={`flex w-full items-center justify-between rounded-3xl border px-4 py-3 text-sm transition ${
+                      selectedCapacities.includes(capacity)
+                        ? 'border-milwaukee bg-milwaukee/10 text-white'
+                        : 'border-white/10 bg-white/5 text-slate-300 hover:border-milwaukee/30 hover:bg-white/10'
+                    }`}
+                  >
+                    <span>{capacity} Ah</span>
+                    <ChevronRight className="h-4 w-4 text-slate-400" />
+                  </button>
+                ))}
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-400">Stok Durumu</legend>
+            <div className="mt-4 space-y-3">
+              {stockOptions.map((status) => (
+                <button
+                  key={status}
+                  type="button"
+                  onClick={() => toggleSelection(status, selectedStock, setSelectedStock)}
+                  className={`flex w-full items-center justify-between rounded-3xl border px-4 py-3 text-sm transition ${
+                    selectedStock.includes(status)
+                      ? 'border-milwaukee bg-milwaukee/10 text-white'
+                      : 'border-white/10 bg-white/5 text-slate-300 hover:border-milwaukee/30 hover:bg-white/10'
+                  }`}
+                >
+                  <span>{status}</span>
+                  <ChevronRight className="h-4 w-4 text-slate-400" />
+                </button>
+              ))}
+            </div>
+          </fieldset>
+        </div>
+      </aside>
+
+      <section>
+        <div className="mb-8 flex flex-wrap items-center justify-between gap-4 rounded-[28px] border border-white/10 bg-[#141414] p-6 shadow-industrial">
+          <div>
+            <p className="text-sm uppercase tracking-[0.22em] text-slate-400">Ürünler</p>
+            <h2 className="mt-2 text-3xl font-semibold text-white">Milwaukee Teknik Ekipmanları</h2>
+          </div>
+          <div className="rounded-3xl bg-white/5 px-4 py-2 text-sm text-slate-300">
+            {filteredProducts.length} ürün bulundu
+          </div>
+        </div>
+
+        <div className="grid gap-6">
+          {filteredProducts.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+          {filteredProducts.length === 0 && (
+            <div className="rounded-[28px] border border-white/10 bg-[#141414] p-8 text-center text-slate-300">
+              <p className="text-lg font-semibold text-white">Filtrenize uyan ürün bulunamadı.</p>
+              <p className="mt-3 text-sm text-slate-400">Başka kombinasyonları deneyin veya tüm filtreleri temizleyin.</p>
+            </div>
+          )}
+        </div>
+      </section>
+    </div>
+  );
+}
