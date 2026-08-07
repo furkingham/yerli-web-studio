@@ -25,6 +25,25 @@ const config: Config = {
       fontFamily: {
         sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
+      keyframes: {
+        'hero-bg': {
+          '0%, 100%': { transform: 'translateX(0px) translateY(0px)' },
+          '50%': { transform: 'translateX(-18px) translateY(-10px)' },
+        },
+        float: {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(-12px)' },
+        },
+        'float-slow': {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(-8px)' },
+        },
+      },
+      animation: {
+        'hero-bg': 'hero-bg 18s ease-in-out infinite',
+        float: 'float 6s ease-in-out infinite',
+        'float-slow': 'float-slow 9s ease-in-out infinite',
+      },
     },
   },
   plugins: [],
