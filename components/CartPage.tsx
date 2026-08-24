@@ -431,13 +431,12 @@ export default function CartPage() {
                       </div>
                     )}
 
-                    <button
-                      type="button"
-                      onClick={handleCheckout}
-                      className="w-full rounded-3xl bg-milwaukee px-5 py-4 text-sm font-semibold uppercase tracking-[0.14em] text-white transition hover:bg-red-600 shadow"
+                    <Link
+                      href="/checkout"
+                      className="flex w-full justify-center rounded-3xl bg-milwaukee px-5 py-4 mt-4 text-sm font-semibold uppercase tracking-[0.14em] text-white transition hover:bg-red-600 shadow"
                     >
                       {t('Siparişi onayla')}
-                    </button>
+                    </Link>
                   </>
                 )}
                 <button

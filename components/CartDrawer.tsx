@@ -97,11 +97,11 @@ export default function CartDrawer() {
           </div>
           <div className="mt-5 grid gap-3">
             <Link
-              href="/cart"
+              href="/checkout"
               className="inline-flex items-center justify-center rounded-3xl bg-white/5 px-5 py-4 text-sm font-semibold uppercase tracking-[0.14em] text-white transition hover:bg-white/10"
               onClick={closeDrawer}
             >
-              Sepete git
+              Satın Al
             </Link>
             <button
               type="button"
