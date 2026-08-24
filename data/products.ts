@@ -1,5 +1,5 @@
-export type Voltage = '12V' | '18V' | '24V';
-export type MotorType = 'Kömürsüz' | 'Kömürlü';
+export type Voltage = '12V' | '18V' | '24V' | '';
+export type MotorType = 'Kömürsüz' | 'Kömürlü' | '';
 export type StockStatus = 'Stokta Var' | 'Kritik Stok' | 'Tükendi';
 
 export interface Product {
@@ -8,14 +8,14 @@ export interface Product {
   name: string;
   category: string;
   price: string;
-  voltage: Voltage;
-  motorType: MotorType;
-  batteryCapacity: number;
-  warranty: string;
+  voltage?: Voltage;
+  motorType?: MotorType;
+  batteryCapacity?: number | '';
+  warranty?: string;
   stockStatus: StockStatus;
   stockQuantity: number;
-  description: string;
-  image: string;
+  description?: string;
+  image?: string;
 }
 
 export const categories = [
@@ -25,8 +25,22 @@ export const categories = [
   'Aksesuar',
 ];
 
-export const getProductBySlug = (slug: string): Product | undefined =>
-  products.find((product) => product.slug === slug);
+export const getProductBySlug = (slug: string): Product | undefined => {
+  if (!slug) return undefined;
+  const clean = slug.toLowerCase().trim();
+  let decoded = clean;
+  try {
+    decoded = decodeURIComponent(slug).toLowerCase().trim();
+  } catch {}
+
+  return products.find(
+    (product) =>
+      product.slug.toLowerCase() === clean ||
+      product.slug.toLowerCase() === decoded ||
+      product.id.toLowerCase() === clean ||
+      product.id.toLowerCase() === decoded
+  );
+};
 
 export const getAllProductSlugs = (): string[] => products.map((product) => product.slug);
 
@@ -44,7 +58,7 @@ export const products: Product[] = [
     stockStatus: 'Stokta Var',
     stockQuantity: 12,
     description: 'Yüksek torklu akülü matkap, profesyonel şantiye performansı ve uzun ömürlü motor sunar.',
-    image: 'https://images.unsplash.com/photo-1517244683842-3d9f3b6f4aa8?q=80&w=1600&auto=format&fit=crop',
+    image: 'https://placehold.co/800x800/db0000/ffffff?text=M18+Matkap',
   },
   {
     id: 'M12-FPD',
@@ -59,7 +73,7 @@ export const products: Product[] = [
     stockStatus: 'Kritik Stok',
     stockQuantity: 4,
     description: 'Kompakt tasarımda güçlü performans, dar alanlarda hassas kontrol sağlar.',
-    image: 'https://images.unsplash.com/photo-1581091012184-7b0a1f86c9f7?q=80&w=1600&auto=format&fit=crop',
+    image: 'https://placehold.co/800x800/db0000/ffffff?text=M12+Vidalama',
   },
   {
     id: 'M18-CAG',
@@ -74,7 +88,7 @@ export const products: Product[] = [
     stockStatus: 'Stokta Var',
     stockQuantity: 9,
     description: 'Yüksek dayanıklılığa sahip kesim performansı, şantiyede uzun süreli kullanım için ideal.',
-    image: 'https://images.unsplash.com/photo-1509395176047-4a66953fd231?q=80&w=1600&auto=format&fit=crop',
+    image: 'https://placehold.co/800x800/db0000/ffffff?text=M18+Testere',
   },
   {
     id: 'M12-SOT',
@@ -89,7 +103,7 @@ export const products: Product[] = [
     stockStatus: 'Stokta Var',
     stockQuantity: 14,
     description: 'Yüksek momentli el aleti; sıkıştırma ve sökme işlemlerinde verimli çözüm.',
-    image: 'https://images.unsplash.com/photo-1581092334498-ff86b2e4f6b7?q=80&w=1600&auto=format&fit=crop',
+    image: 'https://placehold.co/800x800/1a1a1a/ffffff?text=M12+Sökücü',
   },
   {
     id: 'M18-SSG',
@@ -104,7 +118,7 @@ export const products: Product[] = [
     stockStatus: 'Tükendi',
     stockQuantity: 0,
     description: 'Taşlama işlemlerinde yüksek hız ve uzun servis ömrü sağlayan profesyonel ekipman.',
-    image: 'https://images.unsplash.com/photo-1611599539970-3c0b9b3b6b2b?q=80&w=1600&auto=format&fit=crop',
+    image: 'https://placehold.co/800x800/db0000/ffffff?text=M18+Taşlama',
   },
   {
     id: 'M12-TORQ',
@@ -119,7 +133,7 @@ export const products: Product[] = [
     stockStatus: 'Stokta Var',
     stockQuantity: 8,
     description: 'Hassas tork ayarı ve güvenilir ölçüm ile endüstriyel montajlar için ideal.',
-    image: 'https://images.unsplash.com/photo-1581093588401-7f4f1f1b6a8a?q=80&w=1600&auto=format&fit=crop',
+    image: 'https://placehold.co/800x800/1a1a1a/ffffff?text=M12+Tork',
   },
   {
     id: 'M18-PACK',
@@ -134,7 +148,7 @@ export const products: Product[] = [
     stockStatus: 'Kritik Stok',
     stockQuantity: 6,
     description: 'Uzun çalışma süresi için yüksek kapasiteli Milwaukee akü paketi.',
-    image: 'https://images.unsplash.com/photo-1602524811974-3d2d7f2d4f2f?q=80&w=1600&auto=format&fit=crop',
+    image: 'https://placehold.co/800x800/db0000/ffffff?text=M18+Akü+5Ah',
   },
   {
     id: 'M12-GUARD',
@@ -149,7 +163,7 @@ export const products: Product[] = [
     stockStatus: 'Stokta Var',
     stockQuantity: 10,
     description: 'Uzun süreli kullanım için konforlu, darbelere dayanıklı iş güvenliği gözlüğü.',
-    image: 'https://images.unsplash.com/photo-1520880867055-1e30d1cb001c?q=80&w=1600&auto=format&fit=crop',
+    image: 'https://placehold.co/800x800/f59e0b/1a1a1a?text=Koruyucu+Gözlük',
   },
   {
     id: 'M18-HELM',
@@ -164,7 +178,7 @@ export const products: Product[] = [
     stockStatus: 'Stokta Var',
     stockQuantity: 7,
     description: 'Çarpma ve düşmeye karşı dayanıklı, modern tasarımlı profesyonel iş kaskı.',
-    image: 'https://images.unsplash.com/photo-1533658925620-9b1b5b0b6a6f?q=80&w=1600&auto=format&fit=crop',
+    image: 'https://placehold.co/800x800/f59e0b/1a1a1a?text=Profesyonel+Kask',
   },
   {
     id: 'M18-MULTI',
@@ -179,6 +193,6 @@ export const products: Product[] = [
     stockStatus: 'Kritik Stok',
     stockQuantity: 3,
     description: 'Çok yönlü uygulamalar için güçlü akülü araç; uzun süre performans sunar.',
-    image: 'https://images.unsplash.com/photo-1541534401786-3f4f1c6f6f6a?q=80&w=1600&auto=format&fit=crop',
+    image: 'https://placehold.co/800x800/db0000/ffffff?text=M18+Çok+Amaçlı',
   },
 ];

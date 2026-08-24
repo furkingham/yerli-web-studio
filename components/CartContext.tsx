@@ -85,7 +85,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           slug: product.slug,
           name: product.name,
           price: product.price,
-          image: product.image,
+          image: product.image || 'https://placehold.co/800x800/db0000/ffffff?text=Milwaukee',
           quantity,
         },
       ];

@@ -1,112 +1,69 @@
 "use client";
 
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import SearchBar from '../components/SearchBar';
-import CategoryMenu from '../components/CategoryMenu';
 import CampaignBanner from '../components/CampaignBanner';
-import { ShoppingBag, ShieldCheck, Building } from 'lucide-react';
+import { ShoppingBag, ShieldCheck, Building, Star, ArrowRight } from 'lucide-react';
+import { useLanguage } from '../components/LanguageContext';
+import { products } from '../data/products';
 
-const features = [
-  { title: 'Hizli teslimat', description: 'Türkiye çapinda hizli ve güvenilir lojistik.', icon: ShoppingBag },
-  { title: 'Sertifikali ekipman', description: 'Endüstriyel kalite ve dayaniklilik garantisi.', icon: ShieldCheck },
-  { title: 'Kurumsal destek', description: 'Uzman satis ve teknik destek ekibimiz yaninizda.', icon: Building },
-];
-
-const products = [
-  { name: 'M18 FUEL™ Akülü Matkap', price: '14.999 TL' },
-  { name: 'M12 Çift Akülü Vidalama', price: '9.599 TL' },
-  { name: 'Kirmizi Endüstriyel Torque Anahtari', price: '12.299 TL' },
-];
-
-const heroBackgroundImage = 'https://images.unsplash.com/photo-1508898578281-774ac4893a08?q=80&w=1800&auto=format&fit=crop';
-const heroFloating = [
-  {
-    label: 'M18 FUEL™ Akülü Matkap',
-    image: 'https://images.unsplash.com/photo-1517244683842-3d9f3b6f4aa8?q=80&w=900&auto=format&fit=crop',
-  },
-  {
-    label: 'M18 FUEL™ Sarjli Taslama',
-    image: 'https://images.unsplash.com/photo-1611599539970-3c0b9b3b6b2b?q=80&w=900&auto=format&fit=crop',
-  },
-];
+const heroBackgroundImage = 'https://placehold.co/1800x800/1a1a1a/db0000?text=Milwaukee+Heavy+Duty';
 
 export default function HomePage() {
-  const router = useRouter();
+  const { t } = useLanguage();
 
-  const goToProducts = () => router.push('/urunler');
-  const goToCorporateOffer = () => router.push('/kurumsal/teklif');
+  const features = [
+    { title: t('Hizli teslimat'), description: t('Türkiye çapinda hizli ve güvenilir lojistik.'), icon: ShoppingBag },
+    { title: t('Sertifikali ekipman'), description: t('Endüstriyel kalite ve dayaniklilik garantisi.'), icon: ShieldCheck },
+    { title: t('Kurumsal destek'), description: t('Uzman satis ve teknik destek ekibimiz yaninizda.'), icon: Building },
+  ];
 
   return (
-    <>
+    <div className="space-y-8">
       <CampaignBanner />
 
-      <section className="relative isolate overflow-hidden rounded-[32px] border border-white/10 bg-[#0b0b0b]/95 px-6 py-10 shadow-industrial lg:px-10 lg:py-14">
+      {/* Hero Banner */}
+      <section className="relative isolate overflow-hidden rounded-[32px] border border-slate-800 bg-slate-950 px-6 py-6 shadow-industrial lg:px-10 lg:py-8">
         <div className="absolute inset-0">
           <div className="absolute inset-0 opacity-80">
             <Image
               src={heroBackgroundImage}
-              alt="Milwaukee endüstriyel sahne"
+              alt="Milwaukee Atölye"
               fill
               priority
-              className="object-cover object-center opacity-90"
+              sizes="100vw"
+              style={{ objectFit: 'cover', objectPosition: 'center 40%' }}
+              className="scale-105 transform object-cover blur-[2px] transition duration-700 hover:scale-100"
             />
           </div>
-          <div className="absolute inset-0 animate-hero-bg bg-[radial-gradient(circle_at_top_left,rgba(219,0,0,0.18),transparent_25%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.08),transparent_22%)] mix-blend-screen opacity-80" />
-          <div className="absolute inset-0 bg-black/60" />
-          <div className="absolute left-[-10%] top-1/3 h-72 w-72 rounded-full bg-red-500/10 blur-3xl" />
-          <div className="absolute right-[-8%] bottom-24 h-72 w-72 rounded-full bg-white/5 blur-3xl" />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/85 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent" />
         </div>
 
-        <div className="relative grid gap-10 lg:grid-cols-[1.3fr_0.95fr] lg:items-center">
-          <div className="max-w-2xl space-y-6">
-            <span className="inline-flex items-center gap-2 rounded-full border border-milwaukee/20 bg-milwaukee/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-milwaukee shadow-sm shadow-red-500/10">
-              <span className="h-2.5 w-2.5 rounded-full bg-milwaukee" />
-              Endüstriyel Çözümler
-            </span>
-            <h1 className="text-5xl font-semibold tracking-[-0.03em] text-white sm:text-6xl">
-              Milwaukee ile isinizde güven ve güç birlesiyor.
-            </h1>
-            <p className="max-w-xl text-lg leading-8 text-slate-300 sm:text-xl">
-              Insaat firmalari ve büyük ölçekli projeler için özel fiyatlandirma, kurumsal fatura ve öncelikli teknik destek sunuyoruz.
-            </p>
-            <div className="flex flex-col gap-4 sm:flex-row">
-              <button
-                type="button"
-                onClick={goToProducts}
-                className="inline-flex items-center justify-center rounded-full bg-milwaukee px-8 py-4 text-sm font-semibold uppercase tracking-[0.18em] text-white shadow-[0_20px_60px_rgba(219,0,0,0.25)] transition duration-300 hover:scale-[1.02] hover:bg-milwaukee/90"
-              >
-                Ürünlere Göz At
-              </button>
-              <button
-                type="button"
-                onClick={goToCorporateOffer}
-                className="inline-flex items-center justify-center rounded-full border border-white/15 bg-white/5 px-8 py-4 text-sm font-semibold uppercase tracking-[0.18em] text-slate-100 transition duration-300 hover:border-white/25 hover:bg-white/10 hover:text-white"
-              >
-                Kurumsal Teklif Alin
-              </button>
-            </div>
-            <div className="rounded-[28px] border border-white/10 bg-white/5 p-5 shadow-[0_30px_70px_-35px_rgba(0,0,0,0.8)] backdrop-blur-xl">
-              <p className="text-sm uppercase tracking-[0.24em] text-slate-400">Proje çözümü</p>
-              <p className="mt-3 text-sm leading-7 text-slate-300">
-                Güvenilir Milwaukee ekipmanlari, hizlandirilmis lojistik ve kurumsal bütçe planlamasiyla isinizi büyütün.
+        <div className="relative z-10 grid gap-6 lg:grid-cols-12 lg:gap-8">
+          <div className="lg:col-span-12">
+            <div className="max-w-4xl space-y-4">
+              <span className="inline-flex items-center gap-2 rounded-full border border-red-500/30 bg-red-500/10 px-3.5 py-1 text-xs font-bold uppercase tracking-[0.25em] text-red-500 backdrop-blur-md">
+                <span className="h-2 w-2 animate-pulse rounded-full bg-red-500" />
+                Heavy Duty Ekipmanlar
+              </span>
+              <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+                Milwaukee ile işinizde <span className="text-red-500">güven</span> ve <span className="text-red-500">güç</span> bir arada
+              </h1>
+              <p className="max-w-2xl text-xs font-normal leading-relaxed text-slate-300 sm:text-sm">
+                Sanayi ve atölye operasyonlarınız için yüksek performanslı akülü el aletleri ve servis garantili aksesuarlar.
               </p>
-            </div>
-          </div>
 
-          <div className="relative rounded-[32px] border border-white/10 bg-white/10 p-6 shadow-[0_30px_80px_rgba(0,0,0,0.45)] backdrop-blur-xl ring-1 ring-white/10">
-            <div className="absolute inset-0 rounded-[32px] bg-gradient-to-br from-white/10 via-transparent to-white/5" />
-            <div className="relative space-y-6">
-              <h2 className="text-xl font-semibold text-white">Üstün performans özellikleri</h2>
-              <div className="space-y-4">
+              <div className="grid gap-3 pt-3 sm:grid-cols-3">
                 {features.map((feature) => (
-                  <div key={feature.title} className="flex items-start gap-4 rounded-3xl border border-white/10 bg-[#0b0b0b]/80 p-4 backdrop-blur-xl transition duration-300 hover:border-milwaukee/40 hover:bg-white/10">
-                    <span className="grid h-12 w-12 place-items-center rounded-3xl bg-white/10 text-milwaukee shadow-sm shadow-black/20 ring-1 ring-white/10">
-                      <feature.icon className="h-6 w-6" />
+                  <div key={feature.title} className="flex items-start gap-3 rounded-2xl border border-white/5 bg-black/40 p-3 backdrop-blur-xl transition duration-300 hover:border-milwaukee/40 hover:bg-white/5">
+                    <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white/5 text-milwaukee ring-1 ring-white/5">
+                      <feature.icon className="h-5 w-5" />
                     </span>
                     <div>
-                      <h3 className="text-base font-semibold text-white">{feature.title}</h3>
-                      <p className="mt-2 text-sm leading-7 text-slate-300">{feature.description}</p>
+                      <h3 className="text-sm font-semibold text-white">{feature.title}</h3>
+                      <p className="mt-1.5 text-xs leading-5 text-slate-300">{feature.description}</p>
                     </div>
                   </div>
                 ))}
@@ -114,60 +71,93 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-
-        <div className="pointer-events-none hidden lg:block">
-          <div className="absolute right-0 top-1/2 h-[560px] w-[420px] -translate-y-1/2">
-            <div className="absolute left-0 top-10 h-56 w-56 animate-float rounded-[2rem] border border-white/10 bg-[#111111]/90 p-3 shadow-[0_30px_80px_rgba(0,0,0,0.45)]">
-              <div className="relative h-full w-full overflow-hidden rounded-[1.75rem]">
-                <Image src={heroFloating[0].image} alt={heroFloating[0].label} fill className="object-cover" />
-              </div>
-            </div>
-            <div className="absolute right-8 bottom-14 h-64 w-64 animate-float-slow rounded-[2.5rem] border border-white/10 bg-[#111111]/90 p-3 shadow-[0_35px_90px_rgba(0,0,0,0.55)]">
-              <div className="relative h-full w-full overflow-hidden rounded-[2.25rem]">
-                <Image src={heroFloating[1].image} alt={heroFloating[1].label} fill className="object-cover" />
-              </div>
-            </div>
-          </div>
-        </div>
       </section>
 
-      <section className="mt-10 grid gap-8 lg:grid-cols-[2fr_1fr]">
-        <div className="rounded-[28px] bg-[#141414] p-6 shadow-industrial ring-1 ring-white/10">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="text-sm uppercase tracking-[0.22em] text-slate-400">Öne çikan ürünler</p>
-              <h2 className="mt-3 text-3xl font-semibold text-white">Sektörünüz için seçtiklerimiz</h2>
-            </div>
-            <span className="rounded-full bg-white/5 px-4 py-2 text-sm text-slate-200">Stokta</span>
+      {/* Horizontal Search Banner */}
+      <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-md">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+          <div className="space-y-1">
+            <span className="text-xs font-bold uppercase tracking-[0.2em] text-milwaukee">Hızlı Arama & Filtreleme</span>
+            <h2 className="text-xl sm:text-2xl font-bold text-slate-900">{t('Aramayı Hızlandır')}</h2>
+            <p className="text-xs text-slate-500 font-medium">{t('İhtiyacınız olan profesyonel Milwaukee ürün veya parça kodunu doğrudan bulun.')}</p>
           </div>
-          <div className="mt-8 space-y-4">
-            {products.map((product) => (
-              <div key={product.name} className="rounded-3xl border border-white/10 bg-[#131313] p-5 transition hover:border-milwaukee/80 hover:bg-white/5">
-                <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-white">{product.name}</h3>
-                    <p className="mt-2 text-sm text-slate-300">Yüksek tork, dayanikli yapi ve profesyonel kullanim için optimize edildi.</p>
-                  </div>
-                  <p className="text-lg font-semibold text-milwaukee">{product.price}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="space-y-6">
-          <div className="rounded-[28px] border border-white/10 bg-[#141414] p-6 shadow-industrial">
-            <h3 className="text-xl font-semibold text-white">Kategori seçin</h3>
-            <p className="mt-3 text-sm text-slate-300">Kapsamli Milwaukee ürün gamimizda hizlica gezin.</p>
-            <CategoryMenu />
-          </div>
-          <div className="rounded-[28px] border border-white/10 bg-[#141414] p-6 shadow-industrial">
-            <h3 className="text-xl font-semibold text-white">Aramayi hizlandir</h3>
-            <p className="mt-3 text-sm text-slate-300">Ihtiyaciniz olan ürünü dogrudan bulun.</p>
+          <div className="w-full lg:max-w-xl">
             <SearchBar />
           </div>
         </div>
       </section>
-    </>
+
+      {/* Expansive Featured Products (Full Width) */}
+      <section className="rounded-[32px] bg-white p-6 sm:p-8 shadow-[0_15px_45px_rgba(219,0,0,0.12)] border-2 border-milwaukee space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-100 pb-5">
+          <div>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-milwaukee px-3.5 py-1 text-xs font-bold uppercase tracking-[0.14em] text-white shadow-sm">
+              🔥 {t('EN ÇOK SATANLAR')}
+            </span>
+            <h2 className="mt-2 text-2xl sm:text-3xl font-extrabold text-slate-900">{t('Sektörünüz İçin Seçtiklerimiz')}</h2>
+            <p className="text-xs text-slate-500 font-medium mt-1">
+              {t('Yüksek tork, dayanıklı gövde ve profesyonel şantiye kullanımı için optimize edildi.')}
+            </p>
+          </div>
+          <Link
+            href="/category"
+            className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-5 py-3 text-xs font-bold uppercase tracking-wider text-white shadow-sm transition hover:bg-milwaukee"
+          >
+            {t('Tüm Kataloğu İncele')} <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+
+        {/* 6 Products Grid */}
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {products.slice(0, 6).map((product) => (
+            <Link 
+              key={product.id} 
+              href={`/urun/${product.slug}`}
+              className="group flex flex-col justify-between rounded-3xl border border-slate-200/80 bg-slate-50/50 p-5 transition duration-200 hover:-translate-y-1 hover:border-milwaukee hover:bg-white hover:shadow-xl cursor-pointer"
+            >
+              <div className="space-y-4">
+                <div className="relative h-44 w-full overflow-hidden rounded-2xl bg-white border border-slate-150 p-3 flex items-center justify-center">
+                  <Image
+                    src={product.image || 'https://placehold.co/800x800/db0000/ffffff?text=Milwaukee'}
+                    alt={product.name}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                    style={{ objectFit: 'contain' }}
+                    className="rounded-xl transition duration-300 group-hover:scale-105"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                      {t(product.category)}
+                    </span>
+                    <span className="flex items-center gap-1 rounded-md bg-amber-50 border border-amber-200/80 px-2 py-0.5 text-[11px] font-bold text-amber-900">
+                      <Star className="h-3 w-3 fill-amber-400 text-amber-400" /> 5.0
+                    </span>
+                  </div>
+                  <h3 className="text-base font-bold text-slate-900 group-hover:text-milwaukee transition line-clamp-1">
+                    {product.name}
+                  </h3>
+                  <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                    {t(product.description || 'Milwaukee endüstriyel güç ve orijinal garanti güvencesiyle.')}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-5 flex items-center justify-between border-t border-slate-150 pt-4">
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block">Fiyat</span>
+                  <p className="text-lg font-black text-milwaukee">{product.price}</p>
+                </div>
+                <span className="inline-flex items-center gap-1 rounded-xl bg-milwaukee/10 px-3.5 py-2 text-xs font-bold text-milwaukee uppercase tracking-wider group-hover:bg-milwaukee group-hover:text-white transition">
+                  İncele →
+                </span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+    </div>
   );
-}
+}

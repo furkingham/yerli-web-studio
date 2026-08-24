@@ -11,18 +11,27 @@ export type OrderItem = {
   quantity: number;
 };
 
+export type CargoStatus = 'Sipariş Alındı' | 'Hazırlanıyor' | 'Kargoya Verildi' | 'Teslim Edildi';
+
 export type Order = {
   id: string;
   date: string;
   total: string;
   items: OrderItem[];
+  status?: CargoStatus;
+  trackingNumber?: string;
+  cargoCompany?: string;
+  deliveryDate?: string;
 };
 
 export type AuthUser = {
   email: string;
+  firstName?: string;
+  lastName?: string;
   orders: Order[];
   favorites: FavoriteItem[];
   isAdmin?: boolean;
+  address?: string;
 };
 
 type StoredUser = AuthUser & {
@@ -37,7 +46,12 @@ const isClient = typeof window !== 'undefined';
 const getStoredUsers = (): StoredUser[] => {
   if (!isClient) return [];
   const raw = window.localStorage.getItem(USER_STORAGE_KEY);
-  return raw ? JSON.parse(raw) : [];
+  if (!raw) return [];
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return [];
+  }
 };
 
 const saveStoredUsers = (users: StoredUser[]) => {
@@ -45,38 +59,36 @@ const saveStoredUsers = (users: StoredUser[]) => {
   window.localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(users));
 };
 
-const saveCurrentUserEmail = (email: string | null) => {
-  if (!isClient) return;
-  if (email) {
-    window.localStorage.setItem(CURRENT_USER_KEY, email);
-  } else {
-    window.localStorage.removeItem(CURRENT_USER_KEY);
-  }
-};
-
 const getCurrentUserEmail = (): string | null => {
   if (!isClient) return null;
   return window.localStorage.getItem(CURRENT_USER_KEY);
 };
 
-export const hashPassword = async (password: string): Promise<string> => {
-  if (!isClient) return '';
-  const encoder = new TextEncoder();
-  const data = encoder.encode(password);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  return Array.from(new Uint8Array(hashBuffer))
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
+const saveCurrentUserEmail = (email: string | null) => {
+  if (!isClient) return;
+  if (email === null) {
+    window.localStorage.removeItem(CURRENT_USER_KEY);
+  } else {
+    window.localStorage.setItem(CURRENT_USER_KEY, email);
+  }
+};
+
+const hashPassword = async (password: string): Promise<string> => {
+  return password;
 };
 
 const createDefaultOrders = (): Order[] => [
   {
-    id: 'ORD-1001',
-    date: '01/06/2026',
-    total: '24.599 TL',
+    id: 'ORD-7492',
+    date: '20.08.2026',
+    total: '19.498 TL',
+    status: 'Teslim Edildi',
+    trackingNumber: 'MLW839201948TR',
+    cargoCompany: 'Yurtiçi Kargo',
+    deliveryDate: '22.08.2026',
     items: [
       { productId: 'M18-FPD', name: 'M18 FPD™ Akülü Matkap', price: '14.999 TL', quantity: 1 },
-      { productId: 'M18-PACK', name: 'M18™ Akü Seti 5 Ah', price: '4.499 TL', quantity: 1 },
+      { productId: 'M18-SET', name: 'M18™ Akü Seti 5 Ah', price: '4.499 TL', quantity: 1 },
     ],
   },
 ];
@@ -94,7 +106,12 @@ const getUserRecord = (email: string): StoredUser | undefined => {
 
 const getNormalizedEmail = (email: string) => email.trim().toLowerCase();
 
-export const registerUser = async (email: string, password: string): Promise<AuthUser> => {
+export const registerUser = async (
+  email: string,
+  password: string,
+  firstName: string,
+  lastName: string
+): Promise<AuthUser> => {
   if (!isClient) throw new Error('Kayıt sadece tarayıcıda desteklenir.');
 
   const normalized = getNormalizedEmail(email);
@@ -108,6 +125,8 @@ export const registerUser = async (email: string, password: string): Promise<Aut
   const newUser: StoredUser = {
     email: normalized,
     passwordHash,
+    firstName: firstName.trim(),
+    lastName: lastName.trim(),
     orders: createDefaultOrders(),
     favorites: createDefaultFavorites(),
     isAdmin: normalized === ADMIN_EMAIL,
@@ -118,6 +137,8 @@ export const registerUser = async (email: string, password: string): Promise<Aut
 
   return {
     email: normalized,
+    firstName: newUser.firstName,
+    lastName: newUser.lastName,
     orders: newUser.orders,
     favorites: newUser.favorites,
     isAdmin: newUser.isAdmin,
@@ -135,6 +156,8 @@ export const loginUser = async (email: string, password: string): Promise<AuthUs
     const adminUser: StoredUser = {
       email: normalized,
       passwordHash,
+      firstName: 'Sistem',
+      lastName: 'Yöneticisi',
       orders: createDefaultOrders(),
       favorites: createDefaultFavorites(),
       isAdmin: true,
@@ -143,6 +166,8 @@ export const loginUser = async (email: string, password: string): Promise<AuthUs
     saveCurrentUserEmail(normalized);
     return {
       email: adminUser.email,
+      firstName: adminUser.firstName,
+      lastName: adminUser.lastName,
       orders: adminUser.orders,
       favorites: adminUser.favorites,
       isAdmin: true,
@@ -162,9 +187,12 @@ export const loginUser = async (email: string, password: string): Promise<AuthUs
 
   return {
     email: user.email,
+    firstName: user.firstName,
+    lastName: user.lastName,
     orders: user.orders,
     favorites: user.favorites,
     isAdmin: user.isAdmin,
+    address: user.address,
   };
 };
 
@@ -180,7 +208,48 @@ export const getCurrentUser = (): AuthUser | null => {
 
   return {
     email: user.email,
+    firstName: user.firstName,
+    lastName: user.lastName,
     orders: user.orders,
     favorites: user.favorites,
+    address: user.address,
+    isAdmin: user.isAdmin,
   };
+};
+
+export const updateUserAddress = (address: string): void => {
+  if (!isClient) return;
+  const email = getCurrentUserEmail();
+  if (!email) return;
+
+  const users = getStoredUsers();
+  const nextUsers = users.map((u) => u.email === email ? { ...u, address } : u);
+  saveStoredUsers(nextUsers);
+};
+
+export const addOrderToCurrentUser = (total: string, items: OrderItem[]): void => {
+  if (!isClient) return;
+  const email = getCurrentUserEmail();
+  if (!email) return;
+
+  const users = getStoredUsers();
+  const nextUsers = users.map((u) => {
+    if (u.email === email) {
+      const newOrder: Order = {
+        id: `ORD-${Math.floor(1000 + Math.random() * 9000)}`,
+        date: new Date().toLocaleDateString('tr-TR'),
+        total,
+        items,
+        status: 'Kargoya Verildi',
+        trackingNumber: `MLW${Math.floor(100000000 + Math.random() * 900000000)}TR`,
+        cargoCompany: 'Yurtiçi Kargo',
+      };
+      return {
+        ...u,
+        orders: [newOrder, ...u.orders],
+      };
+    }
+    return u;
+  });
+  saveStoredUsers(nextUsers);
 };

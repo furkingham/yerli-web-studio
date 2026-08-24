@@ -7,7 +7,9 @@ const nextConfig = {
       { protocol: 'https', hostname: 'cdn.milwaukee.com', port: '', pathname: '/**' },
       { protocol: 'https', hostname: 'images.milwaukeetool.eu', port: '', pathname: '/**' },
       { protocol: 'https', hostname: 'i.imgur.com', port: '', pathname: '/**' },
+      { protocol: 'https', hostname: 'placehold.co', port: '', pathname: '/**' },
     ],
+    unoptimized: false,
   },
 };
 

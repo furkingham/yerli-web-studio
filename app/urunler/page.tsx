@@ -4,14 +4,14 @@ import { products } from '../../data/products';
 export default function ProductsPage() {
   return (
     <div className="space-y-10">
-      <section className="rounded-[32px] border border-white/10 bg-[#111111] p-8 shadow-industrial">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+      <section className="rounded-[28px] border border-slate-200 bg-white p-8 shadow-md">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-sm uppercase tracking-[0.22em] text-slate-400">Ürün Kataloğu</p>
-            <h1 className="mt-3 text-4xl font-semibold text-white sm:text-5xl">Milwaukee profesyonel ekipmanları</h1>
+            <p className="text-xs font-bold uppercase tracking-[0.22em] text-slate-400">Ürün Kataloğu</p>
+            <h1 className="mt-2 text-3xl sm:text-4xl font-bold text-slate-900">Milwaukee Profesyonel Ekipmanları</h1>
           </div>
-          <p className="max-w-2xl text-sm leading-7 text-slate-300">
-            Kurumsal alım, stok durumu ve teknik özelliklerle desteklenen ürünlerimiz.
+          <p className="max-w-xl text-sm leading-relaxed text-slate-600 font-medium">
+            Tüm ağır hizmet el aletleri, orijinal servis garantisi ve anlık stok takibiyle sizlerle.
           </p>
         </div>
       </section>
