@@ -1,6 +1,6 @@
-﻿'use client';
+'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { products, categories, type StockStatus, type Voltage, type MotorType } from '../../data/products';
 import ProductCard from '../../components/ProductCard';
@@ -10,7 +10,7 @@ const stockOptions: StockStatus[] = ['Stokta Var', 'Kritik Stok', 'Tükendi'];
 const voltageOptions: Voltage[] = ['12V', '18V', '24V'];
 const motorOptions: MotorType[] = ['Kömürsüz', 'Kömürlü'];
 
-export default function CategoryPage() {
+function CategoryPageContent() {
   const searchParams = useSearchParams();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedVoltages, setSelectedVoltages] = useState<Voltage[]>([]);
@@ -207,5 +207,17 @@ export default function CategoryPage() {
         </div>
       </section>
     </div>
+  );
+}
+
+export default function CategoryPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-[400px] items-center justify-center">
+        <div className="text-slate-400">Yükleniyor...</div>
+      </div>
+    }>
+      <CategoryPageContent />
+    </Suspense>
   );
 }
