@@ -21,20 +21,30 @@
       "static/chunks/main-app.js",
       "static/chunks/app/not-found.js"
     ],
-    "/urun/[slug]/page": [
+    "/auth/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/urun/[slug]/page.js"
+      "static/chunks/app/auth/page.js"
+    ],
+    "/hesabim/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/hesabim/page.js"
+    ],
+    "/category/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/category/page.js"
     ],
     "/checkout/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/checkout/page.js"
     ],
-    "/kurumsal/teklif/page": [
+    "/urun/[slug]/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/kurumsal/teklif/page.js"
+      "static/chunks/app/urun/[slug]/page.js"
     ]
   }
 }

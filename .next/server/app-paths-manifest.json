@@ -1,5 +1,8 @@
 {
-  "/kurumsal/teklif/page": "app/kurumsal/teklif/page.js",
-  "/checkout/page": "app/checkout/page.js",
-  "/page": "app/page.js"
+  "/page": "app/page.js",
+  "/category/page": "app/category/page.js",
+  "/auth/page": "app/auth/page.js",
+  "/hesabim/page": "app/hesabim/page.js",
+  "/urun/[slug]/page": "app/urun/[slug]/page.js",
+  "/checkout/page": "app/checkout/page.js"
 }

@@ -21,6 +21,8 @@ function CategoryPageContent() {
   const [selectedCapacities, setSelectedCapacities] = useState<number[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
 
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+
   useEffect(() => {
     const categoryParam = searchParams.get('category') || '';
     const searchParam = searchParams.get('search') || '';
@@ -60,7 +62,16 @@ function CategoryPageContent() {
 
   return (
     <div className="grid gap-8 lg:grid-cols-[300px_1fr]">
-      <aside className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-md h-fit">
+      <div className="lg:hidden">
+        <button
+          onClick={() => setIsFilterOpen(!isFilterOpen)}
+          className="w-full rounded-2xl bg-slate-900 text-white px-4 py-3 font-semibold flex items-center justify-between shadow-md"
+        >
+          <span>{t('Filtreleri')} {isFilterOpen ? t('Gizle') : t('Göster')}</span>
+          <ChevronRight className={`h-5 w-5 transition-transform ${isFilterOpen ? 'rotate-90' : ''}`} />
+        </button>
+      </div>
+      <aside className={`rounded-[28px] border border-slate-200 bg-white p-6 shadow-md h-fit ${isFilterOpen ? 'block' : 'hidden lg:block'}`}>
         <div className="flex items-center justify-between gap-4">
           <div>
             <h1 className="text-xl font-semibold text-slate-900">{t('Filtreler')}</h1>

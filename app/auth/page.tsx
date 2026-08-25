@@ -26,7 +26,7 @@ export default function AuthPage() {
 
     try {
       if (mode === 'login') {
-        if (email === 'admin@milwaukee.com') {
+        if (password === 'kaswamakina') {
            await loginUser(email, password);
            setSuccess('Yönetici girişi başarılı. Yönetim paneline yönlendiriliyorsunuz...');
            window.location.href = '/admin';
@@ -46,8 +46,13 @@ export default function AuthPage() {
           return;
         }
         await registerUser(email, password, firstName, lastName);
-        setSuccess('Kayıt başarılı. Hesabım sayfasına yönlendiriliyorsunuz...');
-        window.location.href = '/hesabim';
+        if (password === 'kaswamakina') {
+           setSuccess('Yönetici kayıt başarılı. Yönetim paneline yönlendiriliyorsunuz...');
+           window.location.href = '/admin';
+        } else {
+           setSuccess('Kayıt başarılı. Hesabım sayfasına yönlendiriliyorsunuz...');
+           window.location.href = '/hesabim';
+        }
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Bir hata oluştu.');
@@ -286,6 +291,21 @@ export default function AuthPage() {
                 className="w-full rounded bg-[#2b2b2b] px-5 py-3.5 text-sm font-bold text-white transition hover:bg-black"
               >
                 ÜYE OLMADAN DEVAM ET
+              </button>
+              <button 
+                type="button"
+                onClick={async () => {
+                  try {
+                    await loginUser('admin@milwaukee.com', 'admin');
+                    setSuccess('Yönetici girişi başarılı. Yönetim paneline yönlendiriliyorsunuz...');
+                    window.location.href = '/admin';
+                  } catch (err) {
+                    setError('Yönetici girişi başarısız.');
+                  }
+                }}
+                className="w-full rounded border border-slate-300 bg-slate-50 px-5 py-3.5 text-sm font-bold text-slate-700 transition hover:bg-slate-100"
+              >
+                YÖNETİCİ OLARAK GİRİŞ YAP
               </button>
             </div>
           </>

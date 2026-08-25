@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Globe, Heart, LogOut, User, Menu, Search, ShoppingCart, X, ChevronRight, Mail, Truck, Phone, ClipboardList, Home } from 'lucide-react';
+import { Globe, Heart, LogOut, User, Menu, Search, ShoppingCart, X, ChevronRight, ChevronLeft, Mail, Truck, Phone, ClipboardList, Home } from 'lucide-react';
 import { useCart } from './CartContext';
 import { useLanguage } from './LanguageContext';
 import { getCurrentUser, logoutUser } from '../lib/auth';
@@ -94,10 +94,20 @@ export default function Header() {
         <div className="bg-[#db0000] text-white">
           <div className="mx-auto flex max-w-screen-2xl items-center justify-between px-4 py-0 lg:px-8">
             {/* Left: Logo + Nav Links */}
-            <div className="flex items-center gap-6 lg:gap-8">
+            <div className="flex items-center gap-2 lg:gap-8">
+              {/* Mobile Back Button */}
+              <button
+                type="button"
+                onClick={() => router.back()}
+                className="flex items-center justify-center p-2 text-white hover:bg-white/15 rounded-lg transition"
+                aria-label={t('Geri Dön')}
+              >
+                <ChevronLeft className="h-6 w-6" />
+              </button>
+
               {/* Logo */}
               <Link href="/" className="flex-shrink-0 py-2">
-                <div className="relative h-10 w-36 sm:h-12 sm:w-44 overflow-hidden">
+                <div className="relative h-10 w-32 sm:h-12 sm:w-44 overflow-hidden">
                   <Image
                     src="/milwaukee-logo.jpg"
                     alt="Milwaukee Logo"

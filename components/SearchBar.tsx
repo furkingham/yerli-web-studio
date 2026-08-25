@@ -40,14 +40,14 @@ export default function SearchBar() {
           <span className="font-semibold text-slate-400">{t('Hızlı Etiketler')}:</span>
           <button
             type="button"
-            onClick={() => router.push('/category?search=matkap')}
+            onClick={() => router.push('/urun/milwaukee-m18-fuel-matkap')}
             className="rounded-lg bg-slate-100 px-3 py-1 font-semibold text-slate-700 transition hover:bg-milwaukee hover:text-white"
           >
             M18 Matkap
           </button>
           <button
             type="button"
-            onClick={() => router.push('/category?search=akü')}
+            onClick={() => router.push('/urun/milwaukee-m18-aku-seti-5-ah')}
             className="rounded-lg bg-slate-100 px-3 py-1 font-semibold text-slate-700 transition hover:bg-milwaukee hover:text-white"
           >
             5.0 Ah Akü
@@ -61,7 +61,7 @@ export default function SearchBar() {
           </button>
           <button
             type="button"
-            onClick={() => router.push('/category?category=El%20Aletleri')}
+            onClick={() => router.push('/urun/milwaukee-m12-akulu-tork-anahtari')}
             className="rounded-lg bg-slate-100 px-3 py-1 font-semibold text-slate-700 transition hover:bg-milwaukee hover:text-white"
           >
             Tork Anahtarı

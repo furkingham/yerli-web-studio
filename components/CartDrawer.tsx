@@ -105,6 +105,13 @@ export default function CartDrawer() {
             </Link>
             <button
               type="button"
+              onClick={closeDrawer}
+              className="inline-flex items-center justify-center rounded-3xl bg-milwaukee px-5 py-4 text-sm font-semibold uppercase tracking-[0.14em] text-white transition hover:bg-red-700"
+            >
+              Alışverişe Devam Et
+            </button>
+            <button
+              type="button"
               onClick={clearCart}
               className="inline-flex items-center justify-center rounded-3xl bg-red-600/10 px-5 py-4 text-sm font-semibold uppercase tracking-[0.14em] text-red-200 transition hover:bg-red-600/20"
             >

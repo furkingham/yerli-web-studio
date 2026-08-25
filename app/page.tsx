@@ -23,55 +23,7 @@ export default function HomePage() {
     <div className="space-y-8">
       <CampaignBanner />
 
-      {/* Hero Banner */}
-      <section className="relative isolate overflow-hidden rounded-[32px] border border-slate-800 bg-slate-950 px-6 py-6 shadow-industrial lg:px-10 lg:py-8">
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 opacity-80">
-            <Image
-              src={heroBackgroundImage}
-              alt="Milwaukee Atölye"
-              fill
-              priority
-              sizes="100vw"
-              style={{ objectFit: 'cover', objectPosition: 'center 40%' }}
-              className="scale-105 transform object-cover blur-[2px] transition duration-700 hover:scale-100"
-            />
-          </div>
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/85 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent" />
-        </div>
 
-        <div className="relative z-10 grid gap-6 lg:grid-cols-12 lg:gap-8">
-          <div className="lg:col-span-12">
-            <div className="max-w-4xl space-y-4">
-              <span className="inline-flex items-center gap-2 rounded-full border border-red-500/30 bg-red-500/10 px-3.5 py-1 text-xs font-bold uppercase tracking-[0.25em] text-red-500 backdrop-blur-md">
-                <span className="h-2 w-2 animate-pulse rounded-full bg-red-500" />
-                Heavy Duty Ekipmanlar
-              </span>
-              <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
-                Milwaukee ile işinizde <span className="text-red-500">güven</span> ve <span className="text-red-500">güç</span> bir arada
-              </h1>
-              <p className="max-w-2xl text-xs font-normal leading-relaxed text-slate-300 sm:text-sm">
-                Sanayi ve atölye operasyonlarınız için yüksek performanslı akülü el aletleri ve servis garantili aksesuarlar.
-              </p>
-
-              <div className="grid gap-3 pt-3 sm:grid-cols-3">
-                {features.map((feature) => (
-                  <div key={feature.title} className="flex items-start gap-3 rounded-2xl border border-white/5 bg-black/40 p-3 backdrop-blur-xl transition duration-300 hover:border-milwaukee/40 hover:bg-white/5">
-                    <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white/5 text-milwaukee ring-1 ring-white/5">
-                      <feature.icon className="h-5 w-5" />
-                    </span>
-                    <div>
-                      <h3 className="text-sm font-semibold text-white">{feature.title}</h3>
-                      <p className="mt-1.5 text-xs leading-5 text-slate-300">{feature.description}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Horizontal Search Banner */}
       <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-md">
