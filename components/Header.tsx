@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Globe, Heart, LogOut, User, Menu, Search, ShoppingCart, X, ChevronRight, ChevronLeft, Mail, Truck, Phone, ClipboardList, Home } from 'lucide-react';
@@ -8,14 +8,19 @@ import { useCart } from './CartContext';
 import { useLanguage } from './LanguageContext';
 import { getCurrentUser, logoutUser } from '../lib/auth';
 import Link from 'next/link';
+import { useSession, signOut } from 'next-auth/react';
 
 const navCategories = ['Akülü Aletler', 'El Aletleri', 'İş Güvenliği', 'Aksesuar'];
 
 export default function Header() {
+  const pathname = usePathname();
+  if (pathname?.startsWith('/admin')) return null;
+
   const { cartCount, openDrawer, cartTotal } = useCart();
   const { language, setLanguage, t } = useLanguage();
   const router = useRouter();
 
+  const { data: session } = useSession();
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -41,11 +46,18 @@ export default function Header() {
     router.push(trimmed ? `/category?search=${encodeURIComponent(trimmed)}` : '/category');
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     logoutUser();
     setUser(null);
+    if (session) {
+      await signOut({ redirect: false });
+    }
     window.location.href = '/';
   };
+
+  // Combine both auth systems
+  const isLoggedIn = mounted && (user || session);
+  const displayName = session?.user?.name || (user ? `${user.firstName} ${user.lastName}` : '');
 
   return (
     <>
@@ -123,9 +135,9 @@ export default function Header() {
               <div className="hidden lg:block h-8 w-px bg-white/30" />
 
               {/* Greeting text */}
-              {mounted && user && (
+              {isLoggedIn && displayName && (
                 <span className="hidden lg:block text-xs font-semibold text-white/90 tracking-wide">
-                  {t('Sayın')} {user.firstName} {user.lastName}
+                  {t('Sayın')} {displayName}
                 </span>
               )}
 
@@ -152,6 +164,12 @@ export default function Header() {
                   {t('Kategoriler')}
                 </Link>
                 <Link
+                  href="/siparis-takip"
+                  className="rounded-lg px-4 py-3 text-sm font-bold text-white transition hover:bg-white/15"
+                >
+                  {t('Sipariş Takip')}
+                </Link>
+                <Link
                   href="/kurumsal/teklif"
                   className="rounded-lg px-4 py-3 text-sm font-bold text-white transition hover:bg-white/15"
                 >
@@ -174,6 +192,15 @@ export default function Header() {
                 />
               </form>
 
+              {/* Mobile Home Button */}
+              <Link
+                href="/"
+                className="flex items-center gap-1.5 rounded-lg px-3 py-3 text-sm font-bold text-white transition hover:bg-white/15 lg:hidden"
+                aria-label={t('Ana Sayfa')}
+              >
+                <Home className="h-5 w-5" />
+              </Link>
+
               {/* Mobile Search Toggle */}
               <button
                 type="button"
@@ -194,30 +221,43 @@ export default function Header() {
                 <Menu className="h-5 w-5" />
               </button>
 
-              <div className="hidden lg:flex items-center gap-2 mr-2">
+              <div className="flex items-center gap-1 sm:gap-2 mr-1 sm:mr-2">
                 <Link
                   href="/hesabim"
-                  className="flex items-center justify-center h-10 w-10 rounded-lg text-white transition hover:bg-white/15"
+                  className="hidden lg:flex items-center justify-center h-10 w-10 rounded-lg text-white transition hover:bg-white/15"
                   aria-label={t('Favorilerim')}
                 >
                   <Heart className="h-5 w-5" />
                 </Link>
 
-                {mounted && user ? (
-                  <div className="group relative flex items-center justify-center h-10 w-10 rounded-lg text-white transition hover:bg-white/15 cursor-pointer">
-                    <User className="h-5 w-5" />
-                    <div className="absolute right-0 top-full mt-1 hidden flex-col w-32 overflow-hidden rounded-lg bg-white shadow-xl group-hover:flex z-50">
-                      <Link href="/hesabim" className="px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">{t('Hesabım')}</Link>
-                      <button onClick={handleLogout} className="px-4 py-2 text-left text-sm text-red-600 hover:bg-slate-100">{t('Çıkış Yap')}</button>
-                    </div>
+                {isLoggedIn ? (
+                  <div className="flex items-center gap-1 sm:gap-2">
+                    <Link
+                      href="/hesabim"
+                      className="flex items-center justify-center h-10 w-10 rounded-lg text-white transition hover:bg-white/15 cursor-pointer"
+                      title="Hesabım"
+                    >
+                      <User className="h-5 w-5" />
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center justify-center h-10 w-10 rounded-lg text-white transition hover:bg-white/15 hover:bg-red-500/20 text-red-100 cursor-pointer"
+                      title="Çıkış Yap"
+                    >
+                      <LogOut className="h-5 w-5" />
+                    </button>
                   </div>
                 ) : (
                   <Link
                     href="/auth"
-                    className="flex flex-col items-start justify-center h-10 rounded-lg px-2 text-white transition hover:bg-white/15"
+                    className="flex items-center justify-center h-10 rounded-lg px-2 text-white transition hover:bg-white/15"
+                    aria-label={t('Giriş Yap')}
                   >
-                    <span className="text-[10px] text-white/70 font-medium leading-none mb-1">{t('Giriş Yap')}</span>
-                    <span className="text-xs font-bold leading-none">{t('veya Üye Ol')}</span>
+                    <User className="h-5 w-5 lg:hidden" />
+                    <div className="hidden lg:flex flex-col items-start justify-center">
+                      <span className="text-[10px] text-white/70 font-medium leading-none mb-1">{t('Giriş Yap')}</span>
+                      <span className="text-xs font-bold leading-none">{t('veya Üye Ol')}</span>
+                    </div>
                   </Link>
                 )}
               </div>

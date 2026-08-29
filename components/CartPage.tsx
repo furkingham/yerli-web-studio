@@ -147,7 +147,19 @@ export default function CartPage() {
         quantity: item.quantity,
       }));
 
-      addOrderToCurrentUser(cartTotal, orderItems);
+      const code = `ORD-${Math.floor(1000 + Math.random() * 9000)}`;
+      const newOrder = {
+        id: code,
+        date: new Date().toLocaleDateString('tr-TR'),
+        total: cartTotal,
+        items: orderItems,
+        status: 'Kargoya Verildi' as any,
+        trackingNumber: `MLW${Math.floor(100000000 + Math.random() * 900000000)}TR`,
+        cargoCompany: 'Yurtiçi Kargo'
+      };
+      
+      addOrderToCurrentUser(newOrder);
+      // Not calling saveGlobalOrder here because CartPage doesn't import it, but we can if we want to.
       setIsProcessingPayment(false);
       setSuccessMsg(t('Ödemeniz ikas Sanal POS ile başarıyla çekildi! Siparişiniz onaylandı...'));
 

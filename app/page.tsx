@@ -59,51 +59,51 @@ export default function HomePage() {
           </Link>
         </div>
 
-        {/* 6 Products Grid */}
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {products.slice(0, 6).map((product) => (
+        {/* 4 Products Grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+          {products.slice(0, 4).map((product) => (
             <Link 
               key={product.id} 
               href={`/urun/${product.slug}`}
-              className="group flex flex-col justify-between rounded-3xl border border-slate-200/80 bg-slate-50/50 p-5 transition duration-200 hover:-translate-y-1 hover:border-milwaukee hover:bg-white hover:shadow-xl cursor-pointer"
+              className="group flex flex-col justify-between rounded-2xl border border-slate-200/80 bg-slate-50/50 p-3 sm:p-5 transition duration-200 hover:-translate-y-1 hover:border-milwaukee hover:bg-white hover:shadow-xl cursor-pointer"
             >
-              <div className="space-y-4">
-                <div className="relative h-44 w-full overflow-hidden rounded-2xl bg-white border border-slate-150 p-3 flex items-center justify-center">
+              <div className="space-y-3 sm:space-y-4">
+                <div className="relative h-28 sm:h-40 w-full overflow-hidden rounded-xl bg-white border border-slate-150 p-2 sm:p-3 flex items-center justify-center">
                   <Image
                     src={product.image || 'https://placehold.co/800x800/db0000/ffffff?text=Milwaukee'}
                     alt={product.name}
                     fill
-                    sizes="(max-width: 768px) 100vw, 33vw"
+                    sizes="(max-width: 768px) 50vw, 25vw"
                     style={{ objectFit: 'contain' }}
-                    className="rounded-xl transition duration-300 group-hover:scale-105"
+                    className="rounded-lg transition duration-300 group-hover:scale-105"
                   />
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-1.5 sm:space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                    <span className="text-[9px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400">
                       {t(product.category)}
                     </span>
-                    <span className="flex items-center gap-1 rounded-md bg-amber-50 border border-amber-200/80 px-2 py-0.5 text-[11px] font-bold text-amber-900">
-                      <Star className="h-3 w-3 fill-amber-400 text-amber-400" /> 5.0
+                    <span className="flex items-center gap-1 rounded-md bg-amber-50 border border-amber-200/80 px-1.5 py-0.5 text-[9px] sm:text-[11px] font-bold text-amber-900">
+                      <Star className="h-2.5 w-2.5 fill-amber-400 text-amber-400" /> 5.0
                     </span>
                   </div>
-                  <h3 className="text-base font-bold text-slate-900 group-hover:text-milwaukee transition line-clamp-1">
+                  <h3 className="text-sm sm:text-base font-bold text-slate-900 group-hover:text-milwaukee transition line-clamp-2 sm:line-clamp-1 leading-snug">
                     {product.name}
                   </h3>
-                  <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                  <p className="hidden sm:block text-xs text-slate-500 line-clamp-2 leading-relaxed">
                     {t(product.description || 'Milwaukee endüstriyel güç ve orijinal garanti güvencesiyle.')}
                   </p>
                 </div>
               </div>
 
-              <div className="mt-5 flex items-center justify-between border-t border-slate-150 pt-4">
+              <div className="mt-3 sm:mt-5 flex items-end justify-between border-t border-slate-150 pt-3 sm:pt-4">
                 <div>
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block">Fiyat</span>
-                  <p className="text-lg font-black text-milwaukee">{product.price}</p>
+                  <span className="text-[9px] sm:text-[10px] uppercase font-bold text-slate-400 block mb-0.5">Fiyat</span>
+                  <p className="text-sm sm:text-lg font-black text-milwaukee">{product.price}</p>
                 </div>
-                <span className="inline-flex items-center gap-1 rounded-xl bg-milwaukee/10 px-3.5 py-2 text-xs font-bold text-milwaukee uppercase tracking-wider group-hover:bg-milwaukee group-hover:text-white transition">
-                  İncele →
+                <span className="inline-flex items-center gap-1 rounded-lg bg-milwaukee/10 px-2 sm:px-3.5 py-1.5 sm:py-2 text-[10px] sm:text-xs font-bold text-milwaukee uppercase tracking-wider group-hover:bg-milwaukee group-hover:text-white transition">
+                  <span className="hidden sm:inline">İncele</span> →
                 </span>
               </div>
             </Link>

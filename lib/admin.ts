@@ -13,11 +13,10 @@ export type Campaign = {
 
 const ADMIN_PRODUCTS_KEY = 'milwaukee_admin_products';
 const ADMIN_CAMPAIGNS_KEY = 'milwaukee_admin_campaigns';
-const ADMIN_EMAIL = 'admin@milwaukee.com';
 
 const isClient = typeof window !== 'undefined';
 
-export const isAdminUser = (user: AuthUser | null): boolean => user?.email === ADMIN_EMAIL;
+export const isAdminUser = (user: AuthUser | null): boolean => user?.isAdmin === true;
 
 export const getAdminProducts = (): Product[] => {
   if (!isClient) return defaultProducts;

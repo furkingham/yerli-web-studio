@@ -1,13 +1,15 @@
 'use client';
 
 import { useMemo, useState, useEffect } from 'react';
-import { getCurrentUser, logoutUser, updateUserAddress, type AuthUser, type Order } from '../../lib/auth';
+import { getCurrentUser, logoutUser, updateUserAddress, registerGoogleUser, type AuthUser, type Order } from '../../lib/auth';
 import Link from 'next/link';
 import { MapPin, Truck, Star } from 'lucide-react';
 import CargoTrackerModal from '../../components/CargoTrackerModal';
 import ReviewModal from '../../components/ReviewModal';
+import { useSession, signOut } from 'next-auth/react';
 
 export default function AccountPage() {
+  const { data: session, status } = useSession();
   const [user, setUser] = useState<AuthUser | null>(null);
   const [mounted, setMounted] = useState(false);
   const [addressSaved, setAddressSaved] = useState(false);
@@ -27,7 +29,14 @@ export default function AccountPage() {
   const [reviewingItem, setReviewingItem] = useState<{ productId: string; name: string } | null>(null);
 
   useEffect(() => {
-    const currentUser = getCurrentUser();
+    // Önce LocalStorage'dan kullanıcıyı kontrol et
+    let currentUser = getCurrentUser();
+
+    // Eğer LocalStorage'da kullanıcı yoksa ama NextAuth session varsa (Google ile giriş), senkronize et
+    if (!currentUser && status === 'authenticated' && session?.user?.email) {
+      currentUser = registerGoogleUser(session.user.email, session.user.name || session.user.email);
+    }
+
     setUser(currentUser);
     if (currentUser?.address) {
       try {
@@ -44,11 +53,11 @@ export default function AccountPage() {
       }
     }
     setMounted(true);
-  }, []);
+  }, [status, session]);
 
   const handleLogout = () => {
     logoutUser();
-    window.location.href = '/';
+    signOut({ callbackUrl: '/' });
   };
 
   const handleSaveAddress = (e: React.FormEvent) => {
@@ -92,6 +101,13 @@ export default function AccountPage() {
   if (!user) {
     if (typeof window !== 'undefined') {
       window.location.href = '/auth';
+    }
+    return null;
+  }
+
+  if (user.isAdmin) {
+    if (typeof window !== 'undefined') {
+      window.location.href = '/admin';
     }
     return null;
   }

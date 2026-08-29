@@ -98,7 +98,7 @@ const createDefaultFavorites = (): FavoriteItem[] => [
   { productId: 'M12-TORQ', name: 'M12™ Akülü Tork Anahtarı', price: '7.999 TL' },
 ];
 
-const ADMIN_EMAIL = 'admin@milwaukee.com';
+const ADMIN_CODE = 'yerliweb2026';
 
 const getUserRecord = (email: string): StoredUser | undefined => {
   return getStoredUsers().find((user) => user.email === email.toLowerCase());
@@ -110,7 +110,8 @@ export const registerUser = async (
   email: string,
   password: string,
   firstName: string,
-  lastName: string
+  lastName: string,
+  isAdmin: boolean = false
 ): Promise<AuthUser> => {
   if (!isClient) throw new Error('Kayıt sadece tarayıcıda desteklenir.');
 
@@ -129,7 +130,7 @@ export const registerUser = async (
     lastName: lastName.trim(),
     orders: createDefaultOrders(),
     favorites: createDefaultFavorites(),
-    isAdmin: normalized === ADMIN_EMAIL,
+    isAdmin,
   };
 
   saveStoredUsers([...users, newUser]);
@@ -149,30 +150,7 @@ export const loginUser = async (email: string, password: string): Promise<AuthUs
   if (!isClient) throw new Error('Giriş sadece tarayıcıda desteklenir.');
 
   const normalized = getNormalizedEmail(email);
-  let user = getUserRecord(normalized);
-
-  if (!user && normalized === ADMIN_EMAIL) {
-    const passwordHash = await hashPassword(password);
-    const adminUser: StoredUser = {
-      email: normalized,
-      passwordHash,
-      firstName: 'Sistem',
-      lastName: 'Yöneticisi',
-      orders: createDefaultOrders(),
-      favorites: createDefaultFavorites(),
-      isAdmin: true,
-    };
-    saveStoredUsers([...getStoredUsers(), adminUser]);
-    saveCurrentUserEmail(normalized);
-    return {
-      email: adminUser.email,
-      firstName: adminUser.firstName,
-      lastName: adminUser.lastName,
-      orders: adminUser.orders,
-      favorites: adminUser.favorites,
-      isAdmin: true,
-    };
-  }
+  const user = getUserRecord(normalized);
 
   if (!user) {
     throw new Error('E-posta veya şifre hatalı.');
@@ -227,7 +205,7 @@ export const updateUserAddress = (address: string): void => {
   saveStoredUsers(nextUsers);
 };
 
-export const addOrderToCurrentUser = (total: string, items: OrderItem[]): void => {
+export const addOrderToCurrentUser = (order: Order): void => {
   if (!isClient) return;
   const email = getCurrentUserEmail();
   if (!email) return;
@@ -235,21 +213,94 @@ export const addOrderToCurrentUser = (total: string, items: OrderItem[]): void =
   const users = getStoredUsers();
   const nextUsers = users.map((u) => {
     if (u.email === email) {
-      const newOrder: Order = {
-        id: `ORD-${Math.floor(1000 + Math.random() * 9000)}`,
-        date: new Date().toLocaleDateString('tr-TR'),
-        total,
-        items,
-        status: 'Kargoya Verildi',
-        trackingNumber: `MLW${Math.floor(100000000 + Math.random() * 900000000)}TR`,
-        cargoCompany: 'Yurtiçi Kargo',
-      };
       return {
         ...u,
-        orders: [newOrder, ...u.orders],
+        orders: [order, ...u.orders],
       };
     }
     return u;
   });
   saveStoredUsers(nextUsers);
+};
+
+// Tüm kayıtlı kullanıcıları temizle
+export const clearAllUsers = (): void => {
+  if (!isClient) return;
+  window.localStorage.removeItem(USER_STORAGE_KEY);
+  window.localStorage.removeItem(CURRENT_USER_KEY);
+};
+
+// Şifre sıfırlama — e-posta ile kullanıcı bul ve yeni şifre ata
+export const resetPassword = async (email: string, newPassword: string): Promise<boolean> => {
+  if (!isClient) return false;
+
+  const normalized = getNormalizedEmail(email);
+  const users = getStoredUsers();
+  const userIndex = users.findIndex((u) => u.email === normalized);
+
+  if (userIndex === -1) return false;
+
+  const passwordHash = await hashPassword(newPassword);
+  users[userIndex].passwordHash = passwordHash;
+  saveStoredUsers(users);
+  return true;
+};
+
+// E-posta adresinin kayıtlı olup olmadığını kontrol et
+export const isEmailRegistered = (email: string): boolean => {
+  if (!isClient) return false;
+  const normalized = getNormalizedEmail(email);
+  return getStoredUsers().some((u) => u.email === normalized);
+};
+
+// Yönetici kodunu doğrula
+export const validateAdminCode = (code: string): boolean => {
+  return code === ADMIN_CODE;
+};
+
+// Google ile giriş yapan kullanıcıyı LocalStorage'a kaydet
+export const registerGoogleUser = (email: string, name: string): AuthUser => {
+  if (!isClient) throw new Error('Sadece tarayıcıda desteklenir.');
+
+  const normalized = getNormalizedEmail(email);
+  const users = getStoredUsers();
+  const existing = users.find((u) => u.email === normalized);
+
+  if (existing) {
+    saveCurrentUserEmail(normalized);
+    return {
+      email: existing.email,
+      firstName: existing.firstName,
+      lastName: existing.lastName,
+      orders: existing.orders,
+      favorites: existing.favorites,
+      isAdmin: existing.isAdmin,
+      address: existing.address,
+    };
+  }
+
+  const [firstName, ...lastParts] = name.split(' ');
+  const lastName = lastParts.join(' ') || '';
+
+  const newUser: StoredUser = {
+    email: normalized,
+    passwordHash: '', // Google kullanıcıları için şifre yok
+    firstName: firstName || '',
+    lastName: lastName,
+    orders: createDefaultOrders(),
+    favorites: createDefaultFavorites(),
+    isAdmin: false,
+  };
+
+  saveStoredUsers([...users, newUser]);
+  saveCurrentUserEmail(normalized);
+
+  return {
+    email: normalized,
+    firstName: newUser.firstName,
+    lastName: newUser.lastName,
+    orders: newUser.orders,
+    favorites: newUser.favorites,
+    isAdmin: false,
+  };
 };
