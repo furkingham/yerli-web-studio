@@ -69,8 +69,8 @@ export default function Header() {
           <div className="mx-auto flex max-w-screen-2xl items-center justify-between px-4 py-1.5 lg:px-8">
             {/* Left links */}
             <div className="flex items-center gap-4 sm:gap-5">
-              <a href="mailto:info@kaswamakina.com" className="hidden sm:flex items-center gap-1.5 hover:text-white transition">
-                <Mail className="h-3 w-3 text-slate-500" /> info@kaswamakina.com
+              <a href="mailto:destek@kaswamakine.com" className="hidden sm:flex items-center gap-1.5 hover:text-white transition">
+                <Mail className="h-3 w-3 text-slate-500" /> destek@kaswamakine.com
               </a>
               <Link href="/hesabim" className="flex items-center gap-1.5 hover:text-white transition">
                 <ClipboardList className="h-3 w-3 text-slate-500" /> {t('Siparişlerim')}
@@ -119,12 +119,12 @@ export default function Header() {
 
               {/* Logo */}
               <Link href="/" className="flex-shrink-0 py-2">
-                <div className="relative h-10 w-32 sm:h-12 sm:w-44 overflow-hidden">
+                <div className="relative h-12 w-36 sm:h-14 sm:w-48 overflow-hidden">
                   <Image
-                    src="/milwaukee-logo.jpg"
-                    alt="Milwaukee Logo"
+                    src="/kaswa-logo.png"
+                    alt="Kaswa Makine Logo"
                     fill
-                    sizes="176px"
+                    sizes="200px"
                     style={{ objectFit: 'contain' }}
                     priority
                   />
@@ -143,32 +143,14 @@ export default function Header() {
 
               {/* Nav Links */}
               <nav className="hidden md:flex items-center gap-1">
-                <Link
-                  href="/"
-                  className="flex items-center justify-center h-10 w-10 rounded-lg text-white transition hover:bg-white/15"
-                  aria-label={t('Anasayfa')}
-                >
-                  <Home className="h-5 w-5" />
-                </Link>
                 <button
                   type="button"
                   onClick={() => setMenuOpen((c) => !c)}
-                  className="flex items-center gap-2 rounded-lg px-4 py-3 text-sm font-bold text-white transition hover:bg-white/15"
+                  className="flex items-center justify-center h-10 w-10 rounded-lg text-white transition hover:bg-white/15"
+                  aria-label={t('Menü')}
                 >
-                  {t('Ürünler')} <Menu className="h-4 w-4" />
+                  <Menu className="h-5 w-5" />
                 </button>
-                <Link
-                  href="/category"
-                  className="rounded-lg px-4 py-3 text-sm font-bold text-white transition hover:bg-white/15"
-                >
-                  {t('Kategoriler')}
-                </Link>
-                <Link
-                  href="/siparis-takip"
-                  className="rounded-lg px-4 py-3 text-sm font-bold text-white transition hover:bg-white/15"
-                >
-                  {t('Sipariş Takip')}
-                </Link>
                 <Link
                   href="/kurumsal/teklif"
                   className="rounded-lg px-4 py-3 text-sm font-bold text-white transition hover:bg-white/15"
@@ -192,10 +174,10 @@ export default function Header() {
                 />
               </form>
 
-              {/* Mobile Home Button */}
+              {/* Home Button */}
               <Link
                 href="/"
-                className="flex items-center gap-1.5 rounded-lg px-3 py-3 text-sm font-bold text-white transition hover:bg-white/15 lg:hidden"
+                className="flex items-center gap-1.5 rounded-lg px-3 py-3 text-sm font-bold text-white transition hover:bg-white/15"
                 aria-label={t('Ana Sayfa')}
               >
                 <Home className="h-5 w-5" />
@@ -230,35 +212,14 @@ export default function Header() {
                   <Heart className="h-5 w-5" />
                 </Link>
 
-                {isLoggedIn ? (
-                  <div className="flex items-center gap-1 sm:gap-2">
-                    <Link
-                      href="/hesabim"
-                      className="flex items-center justify-center h-10 w-10 rounded-lg text-white transition hover:bg-white/15 cursor-pointer"
-                      title="Hesabım"
-                    >
-                      <User className="h-5 w-5" />
-                    </Link>
-                    <button
-                      onClick={handleLogout}
-                      className="flex items-center justify-center h-10 w-10 rounded-lg text-white transition hover:bg-white/15 hover:bg-red-500/20 text-red-100 cursor-pointer"
-                      title="Çıkış Yap"
-                    >
-                      <LogOut className="h-5 w-5" />
-                    </button>
-                  </div>
-                ) : (
-                  <Link
-                    href="/auth"
-                    className="flex items-center justify-center h-10 rounded-lg px-2 text-white transition hover:bg-white/15"
-                    aria-label={t('Giriş Yap')}
+                {isLoggedIn && (
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center justify-center h-10 w-10 rounded-lg text-white transition hover:bg-white/15 hover:bg-red-500/20 text-red-100 cursor-pointer"
+                    title="Çıkış Yap"
                   >
-                    <User className="h-5 w-5 lg:hidden" />
-                    <div className="hidden lg:flex flex-col items-start justify-center">
-                      <span className="text-[10px] text-white/70 font-medium leading-none mb-1">{t('Giriş Yap')}</span>
-                      <span className="text-xs font-bold leading-none">{t('veya Üye Ol')}</span>
-                    </div>
-                  </Link>
+                    <LogOut className="h-5 w-5" />
+                  </button>
                 )}
               </div>
 
@@ -356,6 +317,30 @@ export default function Header() {
                   <ChevronRight className="h-5 w-5 text-slate-400" />
                 </button>
               ))}
+
+              <div className="h-px bg-slate-200 my-4" />
+
+              <button
+                onClick={() => { setMenuOpen(false); router.push('/hesabim'); }}
+                className="flex w-full items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 px-5 py-4 text-left text-base font-semibold text-slate-700 transition hover:border-milwaukee hover:text-milwaukee hover:bg-slate-100/40"
+              >
+                <div className="flex items-center gap-3">
+                  <User className="h-5 w-5" />
+                  <span>{t('Hesabım')}</span>
+                </div>
+                <ChevronRight className="h-5 w-5 text-slate-400" />
+              </button>
+
+              <button
+                onClick={() => { setMenuOpen(false); router.push('/siparis-takip'); }}
+                className="flex w-full items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 px-5 py-4 text-left text-base font-semibold text-slate-700 transition hover:border-milwaukee hover:text-milwaukee hover:bg-slate-100/40"
+              >
+                <div className="flex items-center gap-3">
+                  <ShoppingCart className="h-5 w-5" />
+                  <span>{t('Sipariş Takip')}</span>
+                </div>
+                <ChevronRight className="h-5 w-5 text-slate-400" />
+              </button>
             </div>
 
             <div className="p-6 border-t border-slate-100 bg-slate-50">

@@ -98,7 +98,7 @@ const createDefaultFavorites = (): FavoriteItem[] => [
   { productId: 'M12-TORQ', name: 'M12™ Akülü Tork Anahtarı', price: '7.999 TL' },
 ];
 
-const ADMIN_CODE = 'yerliweb2026';
+const ADMIN_CODE = 'kaswamakine';
 
 const getUserRecord = (email: string): StoredUser | undefined => {
   return getStoredUsers().find((user) => user.email === email.toLowerCase());

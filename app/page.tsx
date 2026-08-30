@@ -8,6 +8,8 @@ import { ShoppingBag, ShieldCheck, Building, Star, ArrowRight } from 'lucide-rea
 import { useLanguage } from '../components/LanguageContext';
 import { products } from '../data/products';
 
+import ProductCarousel from '../components/ProductCarousel';
+
 const heroBackgroundImage = 'https://placehold.co/1800x800/1a1a1a/db0000?text=Milwaukee+Heavy+Duty';
 
 export default function HomePage() {
@@ -110,6 +112,11 @@ export default function HomePage() {
           ))}
         </div>
       </section>
+
+      {/* Product Carousel Section */}
+      <ProductCarousel title="EL ALETİ & AKSESUAR" category="El Aletleri" />
+      <ProductCarousel title="YENİ ÜRÜNLER" />
+
     </div>
   );
 }

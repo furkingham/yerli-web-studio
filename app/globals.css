@@ -11,12 +11,16 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: clip;
+  max-width: 100vw;
 }
 
 body {
   min-height: 100vh;
   background-color: #eef0f3;
   color: #1a1a1a;
+  overflow-x: clip;
+  max-width: 100vw;
 }
 
 * {

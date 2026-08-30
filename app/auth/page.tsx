@@ -509,6 +509,16 @@ export default function AuthPage() {
               >
                 ÜYE OLMADAN DEVAM ET
               </button>
+              
+              <div className="pt-4 border-t border-slate-100">
+                <button 
+                  type="button"
+                  onClick={() => router.push('/auth/admin')}
+                  className="w-full rounded border-2 border-milwaukee bg-white px-5 py-3.5 text-sm font-bold text-milwaukee transition hover:bg-red-50"
+                >
+                  YÖNETİCİ OLARAK GİRİŞ YAP
+                </button>
+              </div>
             </div>
           </>
         )}

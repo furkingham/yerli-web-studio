@@ -228,46 +228,63 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* 3. Address, Social Media & Distributor Notice */}
-          <div className="mt-10 border-t border-slate-700/80 pt-8 space-y-6">
-            <div>
-              <h4 className="text-xs font-bold uppercase tracking-wider text-white">
-                {t('ADRES & İLETİŞİM')}
-              </h4>
-              <div className="mt-3 flex items-center gap-3">
-                <a
-                  href="https://facebook.com"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-slate-900 transition hover:bg-milwaukee hover:text-white"
-                  aria-label="Facebook"
-                >
-                  <Facebook className="h-4 w-4" />
-                </a>
-                <a
-                  href="https://youtube.com"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-slate-900 transition hover:bg-milwaukee hover:text-white"
-                  aria-label="YouTube"
-                >
-                  <Youtube className="h-4 w-4" />
-                </a>
-                <a
-                  href="https://instagram.com"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-slate-900 transition hover:bg-milwaukee hover:text-white"
-                  aria-label="Instagram"
-                >
-                  <Instagram className="h-4 w-4" />
-                </a>
+          {/* 3. Address, Social Media, Distributor Notice & Map */}
+          <div className="mt-10 border-t border-slate-700/80 pt-8 flex flex-col lg:flex-row gap-8 justify-between">
+            <div className="space-y-6 lg:w-1/2">
+              <div>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-white">
+                  {t('ADRES & İLETİŞİM')}
+                </h4>
+                <div className="mt-3 flex items-center gap-3">
+                  <a
+                    href="https://facebook.com"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-slate-900 transition hover:bg-milwaukee hover:text-white"
+                    aria-label="Facebook"
+                  >
+                    <Facebook className="h-4 w-4" />
+                  </a>
+                  <a
+                    href="https://youtube.com"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-slate-900 transition hover:bg-milwaukee hover:text-white"
+                    aria-label="YouTube"
+                  >
+                    <Youtube className="h-4 w-4" />
+                  </a>
+                  <a
+                    href="https://instagram.com"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-slate-900 transition hover:bg-milwaukee hover:text-white"
+                    aria-label="Instagram"
+                  >
+                    <Instagram className="h-4 w-4" />
+                  </a>
+                </div>
+              </div>
+
+              <div className="space-y-1 text-xs text-slate-400 font-normal leading-relaxed">
+                <p>Kaswa Makina, Milwaukee markasının Antalya yetkili bayisidir.</p>
+                <p>Kaswa Makina San. ve Tic. Ltd. Şti. | kaswamakina.com - Antalya / Türkiye</p>
+                <p>Destek: destek@kaswamakine.com</p>
               </div>
             </div>
 
-            <div className="space-y-1 text-xs text-slate-400 font-normal leading-relaxed">
-              <p>Kaswa Makina, Milwaukee markasının Antalya yetkili bayisidir.</p>
-              <p>Kaswa Makina San. ve Tic. Ltd. Şti. | kaswamakina.com - Antalya / Türkiye</p>
+            {/* Map */}
+            <div className="lg:w-1/2 h-48 lg:h-auto min-h-[200px] rounded-xl overflow-hidden border border-slate-700">
+              <iframe 
+                src="https://maps.google.com/maps?q=36.9147,30.6344&t=&z=15&ie=UTF8&iwloc=&output=embed" 
+                width="100%" 
+                height="100%" 
+                style={{ border: 0 }} 
+                allowFullScreen={true} 
+                loading="lazy" 
+                referrerPolicy="no-referrer-when-downgrade"
+                title="Mağaza Konumu"
+              ></iframe>
             </div>
           </div>
         </div>

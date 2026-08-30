@@ -529,7 +529,7 @@ export default function AdminPage() {
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0">
         {/* Top Header */}
-        <header className="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-2 sm:px-4 sticky top-0 z-40 overflow-hidden">
+        <header className="bg-white border-b border-slate-200 h-16 sm:h-20 flex items-center justify-between px-2 sm:px-4 sticky top-0 z-40 overflow-hidden">
           <div className="flex items-center gap-1.5 sm:gap-4 shrink-0">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -538,9 +538,14 @@ export default function AdminPage() {
               <Menu size={22} className="sm:w-6 sm:h-6" />
             </button>
             <div className="flex items-center gap-1.5 sm:gap-3">
-              <div className="font-black text-xs sm:text-xl tracking-tighter text-milwaukee flex items-center">
-                <span className="bg-milwaukee text-white px-1 sm:px-1.5 py-0.5 rounded text-[10px] sm:text-base mr-1 sm:mr-2">M</span>
-                <span>MILWAUKEE</span>
+              <div className="relative h-10 w-28 sm:h-12 sm:w-36 overflow-hidden">
+                <Image
+                  src="/kaswa-logo.png"
+                  alt="Kaswa Makine Logo"
+                  fill
+                  style={{ objectFit: 'contain' }}
+                  priority
+                />
               </div>
               <div className="h-6 w-px bg-slate-300"></div>
               <span className="text-[8px] sm:text-sm font-medium text-slate-500 leading-[1.1] sm:leading-normal w-[85px] sm:w-auto">

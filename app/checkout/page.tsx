@@ -15,6 +15,7 @@ export default function CheckoutPage() {
   const [addressSaved, setAddressSaved] = useState(false);
   const [step, setStep] = useState(1);
   const [orderCode, setOrderCode] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<'credit_card' | 'bank_transfer'>('credit_card');
 
   // User state
   const [user, setUser] = useState<any>(null);
@@ -96,6 +97,23 @@ export default function CheckoutPage() {
     if (user) {
       addOrderToCurrentUser(newOrder);
     }
+
+    // 3. Arka planda mail otomasyonunu tetikle
+    const customerEmail = user?.email || 'Müşteri e-postası (Misafir)';
+    const customerName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : 'Misafir Kullanıcı';
+    
+    fetch('/api/send-order-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        orderCode: code,
+        total: cartTotal,
+        customerEmail,
+        customerName,
+        paymentMethod: paymentMethod,
+        items: items
+      })
+    }).catch(err => console.error("Mail otomasyonu tetiklenemedi:", err));
 
     clearCart();
     setStep(3); // Başarı adımı
@@ -265,40 +283,121 @@ export default function CheckoutPage() {
           {step === 2 && (
             <>
               <div className="flex items-center gap-2 text-sm font-bold text-slate-900 mb-2">
-                <MapPin className="h-4 w-4 text-milwaukee" /> ÖDEME BİLGİLERİ (KREDİ KARTI)
+                <MapPin className="h-4 w-4 text-milwaukee" /> ÖDEME SEÇENEKLERİ
               </div>
-              <div className="rounded border border-slate-200 bg-white p-6 md:p-8">
-                <form onSubmit={handlePaymentSubmit} className="space-y-6">
-                  <div className="space-y-4">
-                    <div className="space-y-1">
-                      <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Kart Üzerindeki İsim</label>
-                      <input type="text" required className="w-full rounded border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-milwaukee" />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Kart Numarası</label>
-                      <input type="text" required placeholder="0000 0000 0000 0000" className="w-full rounded border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-milwaukee" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-1">
-                        <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Son Kullanma (AA/YY)</label>
-                        <input type="text" required placeholder="MM/YY" className="w-full rounded border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-milwaukee" />
-                      </div>
-                      <div className="space-y-1">
-                        <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">CVV</label>
-                        <input type="text" required placeholder="123" className="w-full rounded border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-milwaukee" />
-                      </div>
-                    </div>
+              <div className="rounded border border-slate-200 bg-white p-6 md:p-8 space-y-6">
+                
+                {/* Havale / EFT Seçeneği */}
+                <div 
+                  className={`rounded-lg border-2 p-4 cursor-pointer transition ${paymentMethod === 'bank_transfer' ? 'border-milwaukee bg-red-50/20' : 'border-slate-200 hover:border-slate-300'}`}
+                  onClick={() => setPaymentMethod('bank_transfer')}
+                >
+                  <div className="flex items-center gap-3">
+                    <input 
+                      type="radio" 
+                      name="paymentMethod" 
+                      checked={paymentMethod === 'bank_transfer'} 
+                      onChange={() => setPaymentMethod('bank_transfer')}
+                      className="h-4 w-4 text-milwaukee focus:ring-milwaukee cursor-pointer"
+                    />
+                    <h3 className="font-bold text-slate-800 uppercase tracking-wider text-sm">HAVALE / EFT</h3>
                   </div>
-                  
-                  <div className="pt-8 mt-6 border-t border-slate-100 flex items-center justify-between">
-                    <button type="button" onClick={() => setStep(1)} className="text-sm font-bold text-slate-400 hover:text-slate-800 underline decoration-slate-300 underline-offset-4">
-                      Geri Dön
-                    </button>
-                    <button type="submit" className="md:w-1/2 rounded bg-milwaukee px-6 py-4 text-sm font-bold text-white transition hover:bg-red-700 shadow">
-                      ÖDEMEYİ TAMAMLA
-                    </button>
+
+                  {paymentMethod === 'bank_transfer' && (
+                    <div className="mt-4 pt-4 border-t border-red-100 text-sm text-slate-700 space-y-3">
+                      <ul className="list-disc pl-5 space-y-1 text-xs sm:text-sm">
+                        <li>Havale Fiyatı: <strong>{cartTotal}</strong> (Kargo Ücretsiz)</li>
+                        <li>Havalenizi yaparken gönderen bölümünde mutlaka <strong>{user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : 'Adınızı Soyadınızı'}</strong> kullanınız.</li>
+                        <li>Aşağıdaki listeden havale göndermek istediğiniz banka hesap numarasını seçiniz.</li>
+                        <li>Havale yaparken alıcı olarak mutlaka <strong>KASWA MAKİNA SAN. VE TİC. LTD. ŞTİ.</strong> belirtiniz.</li>
+                        <li>Sipariş onaylandıktan sonra oluşacak "ORD..." ile başlayan Sipariş Kodunuzu havalenizin açıklama bölümünde belirtiniz.</li>
+                      </ul>
+
+                      <h4 className="font-bold text-slate-900 mt-6 mb-3 text-lg">Banka Hesaplarımız</h4>
+                      <div className="space-y-3">
+                        {/* Dummy IBAN 1 */}
+                        <label className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 border border-slate-200 rounded cursor-pointer hover:bg-white bg-slate-50 transition">
+                          <div className="flex items-center gap-2">
+                            <input type="radio" name="bankIban" defaultChecked className="text-milwaukee focus:ring-milwaukee" />
+                            <span className="font-semibold text-xs sm:text-sm whitespace-nowrap">GARANTİ BANKASI</span>
+                          </div>
+                          <span className="text-[10px] sm:text-xs text-slate-500 break-all bg-white sm:bg-transparent px-2 sm:px-0 py-1 sm:py-0 border sm:border-none border-slate-200 rounded">TR27 0006 2000 6610 0006 2959 16</span>
+                        </label>
+                        {/* Dummy IBAN 2 */}
+                        <label className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 border border-slate-200 rounded cursor-pointer hover:bg-white bg-slate-50 transition">
+                          <div className="flex items-center gap-2">
+                            <input type="radio" name="bankIban" className="text-milwaukee focus:ring-milwaukee" />
+                            <span className="font-semibold text-xs sm:text-sm whitespace-nowrap">ZİRAAT BANKASI</span>
+                          </div>
+                          <span className="text-[10px] sm:text-xs text-slate-500 break-all bg-white sm:bg-transparent px-2 sm:px-0 py-1 sm:py-0 border sm:border-none border-slate-200 rounded">TR15 0001 0022 9076 9899 4650 01</span>
+                        </label>
+                        {/* Dummy IBAN 3 */}
+                        <label className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 border border-slate-200 rounded cursor-pointer hover:bg-white bg-slate-50 transition">
+                          <div className="flex items-center gap-2">
+                            <input type="radio" name="bankIban" className="text-milwaukee focus:ring-milwaukee" />
+                            <span className="font-semibold text-xs sm:text-sm whitespace-nowrap">AKBANK</span>
+                          </div>
+                          <span className="text-[10px] sm:text-xs text-slate-500 break-all bg-white sm:bg-transparent px-2 sm:px-0 py-1 sm:py-0 border sm:border-none border-slate-200 rounded">TR45 0004 6007 2888 8000 0703 09</span>
+                        </label>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Kredi Kartı Seçeneği */}
+                <div 
+                  className={`rounded-lg border-2 p-4 cursor-pointer transition ${paymentMethod === 'credit_card' ? 'border-milwaukee bg-red-50/20' : 'border-slate-200 hover:border-slate-300'}`}
+                  onClick={() => setPaymentMethod('credit_card')}
+                >
+                  <div className="flex items-center gap-3">
+                    <input 
+                      type="radio" 
+                      name="paymentMethod" 
+                      checked={paymentMethod === 'credit_card'} 
+                      onChange={() => setPaymentMethod('credit_card')}
+                      className="h-4 w-4 text-milwaukee focus:ring-milwaukee cursor-pointer"
+                    />
+                    <h3 className="font-bold text-slate-800 uppercase tracking-wider text-sm">KREDİ KARTI</h3>
                   </div>
-                </form>
+
+                  {paymentMethod === 'credit_card' && (
+                    <div className="mt-4 pt-4 border-t border-red-100">
+                      <div className="space-y-4">
+                        <div className="space-y-1">
+                          <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Kart Üzerindeki İsim</label>
+                          <input type="text" required={paymentMethod === 'credit_card'} className="w-full rounded border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-milwaukee" />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Kart Numarası</label>
+                          <input type="text" required={paymentMethod === 'credit_card'} placeholder="0000 0000 0000 0000" className="w-full rounded border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-milwaukee" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Son Kullanma (AA/YY)</label>
+                            <input type="text" required={paymentMethod === 'credit_card'} placeholder="MM/YY" className="w-full rounded border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-milwaukee" />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">CVV</label>
+                            <input type="text" required={paymentMethod === 'credit_card'} placeholder="123" className="w-full rounded border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-milwaukee" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="pt-8 mt-6 border-t border-slate-100 flex items-center justify-between">
+                  <button type="button" onClick={() => setStep(1)} className="text-sm font-bold text-slate-400 hover:text-slate-800 underline decoration-slate-300 underline-offset-4">
+                    Geri Dön
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={handlePaymentSubmit}
+                    className="md:w-1/2 rounded bg-milwaukee px-6 py-4 text-sm font-bold text-white transition hover:bg-red-700 shadow text-center"
+                  >
+                    ÖDEMEYİ TAMAMLA
+                  </button>
+                </div>
               </div>
             </>
           )}
