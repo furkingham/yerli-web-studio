@@ -538,12 +538,13 @@ export default function AdminPage() {
               <Menu size={22} className="sm:w-6 sm:h-6" />
             </button>
             <div className="flex items-center gap-1.5 sm:gap-3">
-              <div className="relative h-10 w-28 sm:h-12 sm:w-36 overflow-hidden">
+              <div className="flex items-center">
                 <Image
                   src="/kaswa-logo.png"
                   alt="Kaswa Makine Logo"
-                  fill
-                  style={{ objectFit: 'contain' }}
+                  width={144}
+                  height={60}
+                  className="h-10 sm:h-12 w-auto object-contain"
                   priority
                 />
               </div>

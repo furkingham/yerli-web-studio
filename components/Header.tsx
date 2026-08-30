@@ -107,28 +107,17 @@ export default function Header() {
           <div className="mx-auto flex max-w-screen-2xl items-center justify-between px-4 py-0 lg:px-8">
             {/* Left: Logo + Nav Links */}
             <div className="flex items-center gap-2 lg:gap-8">
-              {/* Mobile Back Button */}
-              <button
-                type="button"
-                onClick={() => router.back()}
-                className="flex items-center justify-center p-2 text-white hover:bg-white/15 rounded-lg transition"
-                aria-label={t('Geri Dön')}
-              >
-                <ChevronLeft className="h-6 w-6" />
-              </button>
 
               {/* Logo */}
-              <Link href="/" className="flex-shrink-0 py-2">
-                <div className="relative h-12 w-36 sm:h-14 sm:w-48 overflow-hidden">
-                  <Image
-                    src="/kaswa-logo.png"
-                    alt="Kaswa Makine Logo"
-                    fill
-                    sizes="200px"
-                    style={{ objectFit: 'contain' }}
-                    priority
-                  />
-                </div>
+              <Link href="/" className="flex-shrink-0 py-2 flex items-center">
+                <Image
+                  src="/kaswa-logo.png"
+                  alt="Kaswa Makine Logo"
+                  width={240}
+                  height={100}
+                  className="h-12 sm:h-16 w-auto object-contain"
+                  priority
+                />
               </Link>
 
               {/* Divider */}

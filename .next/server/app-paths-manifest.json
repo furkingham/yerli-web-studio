@@ -1,9 +1,4 @@
 {
-  "/checkout/page": "app/checkout/page.js",
   "/page": "app/page.js",
-  "/auth/admin/page": "app/auth/admin/page.js",
-  "/auth/page": "app/auth/page.js",
-  "/urun/[slug]/page": "app/urun/[slug]/page.js",
-  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
-  "/admin/page": "app/admin/page.js"
+  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js"
 }
