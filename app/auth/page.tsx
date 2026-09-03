@@ -5,12 +5,13 @@ import { loginUser, registerUser, clearAllUsers, resetPassword, isEmailRegistere
 import { Eye, EyeOff, X } from 'lucide-react';
 import { signIn, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { iller, getIlceler } from '../../data/turkiye-lokasyonlari';
 
 export default function AuthPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
-  const [mode, setMode] = useState<'login' | 'register'>('register');
+  const [mode, setMode] = useState<'login' | 'register'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
@@ -25,9 +26,10 @@ export default function AuthPage() {
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
   const [isNotTC, setIsNotTC] = useState(false);
 
-  // Admin code
-  const [adminCode, setAdminCode] = useState('');
-  const [showAdminField, setShowAdminField] = useState(false);
+
+  // İl / İlçe
+  const [selectedCity, setSelectedCity] = useState('');
+  const [selectedDistrict, setSelectedDistrict] = useState('');
 
   // Şifremi Unuttum modal
   const [showResetModal, setShowResetModal] = useState(false);
@@ -112,15 +114,7 @@ export default function AuthPage() {
           return;
         }
 
-        // Admin kodu kontrolü
-        const isAdmin = showAdminField && adminCode.trim() !== '' && validateAdminCode(adminCode.trim());
-        if (showAdminField && adminCode.trim() !== '' && !isAdmin) {
-          setError('Geçersiz yönetici kodu.');
-          setLoading(false);
-          return;
-        }
-
-        const user = await registerUser(email, password, firstName, lastName, isAdmin);
+        const user = await registerUser(email, password, firstName, lastName, false);
 
         // NextAuth session oluştur
         await signIn('credentials', {
@@ -128,17 +122,12 @@ export default function AuthPage() {
           password,
           firstName: user.firstName || '',
           lastName: user.lastName || '',
-          isAdmin: String(user.isAdmin || false),
+          isAdmin: 'false',
           redirect: false,
         });
 
-        if (user.isAdmin) {
-          setSuccess('Yönetici kayıt başarılı. Yönetim paneline yönlendiriliyorsunuz...');
-          setTimeout(() => { window.location.href = '/admin'; }, 800);
-        } else {
-          setSuccess('Kayıt başarılı. Hesabım sayfasına yönlendiriliyorsunuz...');
-          setTimeout(() => { window.location.href = '/hesabim'; }, 800);
-        }
+        setSuccess('Kayıt başarılı. Hesabım sayfasına yönlendiriliyorsunuz...');
+        setTimeout(() => { window.location.href = '/hesabim'; }, 800);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Bir hata oluştu.');
@@ -199,36 +188,9 @@ export default function AuthPage() {
   return (
     <div className="mx-auto max-w-2xl rounded-sm border border-slate-200 bg-white p-6 md:p-10 shadow-sm mt-8 mb-16">
       
-      {/* Tabs */}
-      <div className="mb-8 flex border-b border-slate-200">
-        <button
-          type="button"
-          onClick={() => {
-            setMode('register');
-            setError(null);
-            setSuccess(null);
-          }}
-          className={`pb-4 px-2 font-bold text-sm tracking-wide ${
-            mode === 'register' ? 'border-b-2 border-milwaukee text-milwaukee' : 'text-slate-600 hover:text-slate-900'
-          }`}
-        >
-          ÜYE KAYIT
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            setMode('login');
-            setError(null);
-            setSuccess(null);
-          }}
-          className={`pb-4 ml-6 px-2 font-bold text-sm tracking-wide ${
-            mode === 'login' ? 'border-b-2 border-milwaukee text-milwaukee' : 'text-slate-600 hover:text-slate-900'
-          }`}
-        >
-          ÜYE GİRİŞİ
-        </button>
-      </div>
-
+      <h2 className="mb-8 text-2xl font-extrabold text-slate-900 text-center">
+        {mode === 'login' ? 'Üye Girişi' : 'Yeni Üye Kaydı'}
+      </h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && <div className="rounded bg-red-50 p-4 text-sm text-red-600 border border-red-200">{error}</div>}
         {success && <div className="rounded bg-green-50 p-4 text-sm text-green-600 border border-green-200">{success}</div>}
@@ -310,20 +272,33 @@ export default function AuthPage() {
 
             {/* İl ve İlçe */}
             <div>
-              <select name="city" className="w-full rounded border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none focus:border-milwaukee appearance-none mb-4">
+              <select
+                name="city"
+                value={selectedCity}
+                onChange={(e) => {
+                  setSelectedCity(e.target.value);
+                  setSelectedDistrict('');
+                }}
+                className="w-full rounded border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none focus:border-milwaukee appearance-none mb-4"
+              >
                 <option value="">İl Seçiniz</option>
-                <option value="antalya">Antalya</option>
-                <option value="istanbul">İstanbul</option>
-                <option value="ankara">Ankara</option>
-                <option value="izmir">İzmir</option>
+                {iller.map((il) => (
+                  <option key={il} value={il}>{il}</option>
+                ))}
               </select>
               
-              <input
-                type="text"
+              <select
                 name="district"
-                placeholder="İlçe"
-                className="w-full rounded border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-milwaukee placeholder:text-slate-500"
-              />
+                value={selectedDistrict}
+                onChange={(e) => setSelectedDistrict(e.target.value)}
+                disabled={!selectedCity}
+                className="w-full rounded border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none focus:border-milwaukee appearance-none disabled:bg-slate-50"
+              >
+                <option value="">İlçe Seçiniz</option>
+                {selectedCity && getIlceler(selectedCity).map((ilce) => (
+                  <option key={ilce} value={ilce}>{ilce}</option>
+                ))}
+              </select>
             </div>
 
             {/* Şifre */}
@@ -360,27 +335,6 @@ export default function AuthPage() {
               </button>
             </div>
 
-            {/* Yönetici Kodu (opsiyonel) */}
-            <div>
-              <button
-                type="button"
-                onClick={() => setShowAdminField(!showAdminField)}
-                className="text-xs text-slate-500 hover:text-milwaukee underline underline-offset-2"
-              >
-                {showAdminField ? 'Yönetici kodunu gizle' : 'Yönetici kodu var mı?'}
-              </button>
-              {showAdminField && (
-                <input
-                  type="password"
-                  name="adminCode"
-                  autoComplete="off"
-                  value={adminCode}
-                  onChange={(e) => setAdminCode(e.target.value)}
-                  placeholder="Yönetici Kodu"
-                  className="mt-2 w-full rounded border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-milwaukee placeholder:text-slate-500"
-                />
-              )}
-            </div>
 
             {/* Checkboxes */}
             <div className="pt-4 space-y-4">
@@ -423,6 +377,17 @@ export default function AuthPage() {
                 className="w-full rounded bg-milwaukee px-5 py-3.5 text-sm font-bold text-white transition hover:bg-red-700 disabled:opacity-50"
               >
                 {loading ? 'İŞLENİYOR...' : 'KAYIT OL'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMode('login');
+                  setError(null);
+                  setSuccess(null);
+                }}
+                className="w-full rounded border border-slate-300 bg-white px-5 py-3.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
+              >
+                GİRİŞ EKRANINA DÖN
               </button>
               <button 
                 type="button" 
@@ -494,6 +459,17 @@ export default function AuthPage() {
               >
                 {loading ? 'GİRİŞ YAPILIYOR...' : 'GİRİŞ YAP'}
               </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMode('register');
+                  setError(null);
+                  setSuccess(null);
+                }}
+                className="w-full rounded border-2 border-milwaukee bg-white px-5 py-3.5 text-sm font-bold text-milwaukee transition hover:bg-red-50"
+              >
+                KAYIT OL
+              </button>
               <button 
                 type="button" 
                 onClick={handleGoogleSignIn}
@@ -509,16 +485,6 @@ export default function AuthPage() {
               >
                 ÜYE OLMADAN DEVAM ET
               </button>
-              
-              <div className="pt-4 border-t border-slate-100">
-                <button 
-                  type="button"
-                  onClick={() => router.push('/auth/admin')}
-                  className="w-full rounded border-2 border-milwaukee bg-white px-5 py-3.5 text-sm font-bold text-milwaukee transition hover:bg-red-50"
-                >
-                  YÖNETİCİ OLARAK GİRİŞ YAP
-                </button>
-              </div>
             </div>
           </>
         )}

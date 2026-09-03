@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { products, categories, type StockStatus, type Voltage, type MotorType } from '../../data/products';
+import { categories, type Product, type StockStatus, type Voltage, type MotorType } from '../../data/products';
+import { getAdminProducts } from '../../lib/admin';
 import ProductCard from '../../components/ProductCard';
 import { ChevronRight, Slash } from 'lucide-react';
 import { useLanguage } from '../../components/LanguageContext';
@@ -14,6 +15,12 @@ const motorOptions: MotorType[] = ['Kömürsüz', 'Kömürlü'];
 function CategoryPageContent() {
   const searchParams = useSearchParams();
   const { t } = useLanguage();
+  const [products, setProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    setProducts(getAdminProducts());
+  }, []);
+
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedVoltages, setSelectedVoltages] = useState<Voltage[]>([]);
   const [selectedMotorTypes, setSelectedMotorTypes] = useState<MotorType[]>([]);

@@ -7,6 +7,7 @@ import { MapPin, Truck, Star } from 'lucide-react';
 import CargoTrackerModal from '../../components/CargoTrackerModal';
 import ReviewModal from '../../components/ReviewModal';
 import { useSession, signOut } from 'next-auth/react';
+import { iller, getIlceler } from '../../data/turkiye-lokasyonlari';
 
 export default function AccountPage() {
   const { data: session, status } = useSession();
@@ -182,23 +183,33 @@ export default function AccountPage() {
               <div className="grid gap-3 sm:grid-cols-2">
                 <label className="flex flex-col text-xs font-semibold text-slate-500 gap-1.5">
                   İl
-                  <input
-                    type="text"
+                  <select
                     value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    placeholder="Örn. İstanbul"
+                    onChange={(e) => {
+                      setCity(e.target.value);
+                      setDistrict('');
+                    }}
                     className="rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-sm text-slate-900 outline-none focus:border-milwaukee"
-                  />
+                  >
+                    <option value="">İl Seçiniz</option>
+                    {iller.map((il) => (
+                      <option key={il} value={il}>{il}</option>
+                    ))}
+                  </select>
                 </label>
                 <label className="flex flex-col text-xs font-semibold text-slate-500 gap-1.5">
                   İlçe
-                  <input
-                    type="text"
+                  <select
                     value={district}
                     onChange={(e) => setDistrict(e.target.value)}
-                    placeholder="Örn. Kadıköy"
-                    className="rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-sm text-slate-900 outline-none focus:border-milwaukee"
-                  />
+                    disabled={!city}
+                    className="rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-sm text-slate-900 outline-none focus:border-milwaukee disabled:bg-slate-100"
+                  >
+                    <option value="">İlçe Seçiniz</option>
+                    {city && getIlceler(city).map((ilce) => (
+                      <option key={ilce} value={ilce}>{ilce}</option>
+                    ))}
+                  </select>
                 </label>
               </div>
               <div className="grid gap-3 sm:grid-cols-2">

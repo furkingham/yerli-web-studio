@@ -6,7 +6,9 @@ import SearchBar from '../components/SearchBar';
 import CampaignBanner from '../components/CampaignBanner';
 import { ShoppingBag, ShieldCheck, Building, Star, ArrowRight } from 'lucide-react';
 import { useLanguage } from '../components/LanguageContext';
-import { products } from '../data/products';
+import { Product } from '../data/products';
+import { getAdminProducts } from '../lib/admin';
+import { useState, useEffect } from 'react';
 
 import ProductCarousel from '../components/ProductCarousel';
 
@@ -14,6 +16,11 @@ const heroBackgroundImage = 'https://placehold.co/1800x800/1a1a1a/db0000?text=Mi
 
 export default function HomePage() {
   const { t } = useLanguage();
+  const [products, setProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    setProducts(getAdminProducts());
+  }, []);
 
   const features = [
     { title: t('Hizli teslimat'), description: t('Türkiye çapinda hizli ve güvenilir lojistik.'), icon: ShoppingBag },

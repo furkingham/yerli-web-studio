@@ -2,467 +2,175 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { Minus, Plus, MapPin } from 'lucide-react';
+import { Minus, Plus, Trash2, ShoppingCart, ShieldCheck } from 'lucide-react';
 import { useCart } from './CartContext';
-import { getCurrentUser, updateUserAddress, addOrderToCurrentUser } from '../lib/auth';
-import { useState, useEffect } from 'react';
-import { useLanguage } from './LanguageContext';
+import { useRouter } from 'next/navigation';
+import { getCurrentUser } from '../lib/auth';
 
 export default function CartPage() {
-  const { cartItems, cartCount, cartTotal, updateQuantity, removeFromCart, clearCart } = useCart();
-  const { t } = useLanguage();
-
-  const [user, setUser] = useState<any>(null);
-  const [showAddressForm, setShowAddressForm] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
-  const [successMsg, setSuccessMsg] = useState('');
-
-  // Detailed address states
-  const [city, setCity] = useState('');
-  const [district, setDistrict] = useState('');
-  const [neighborhood, setNeighborhood] = useState('');
-  const [street, setStreet] = useState('');
-  const [apartment, setApartment] = useState('');
-  const [doorNo, setDoorNo] = useState('');
-  const [directions, setDirections] = useState('');
-
-  // ikas Sanal POS states
-  const [showPaymentStep, setShowPaymentStep] = useState(false);
-  const [cardHolder, setCardHolder] = useState('');
-  const [cardNumber, setCardNumber] = useState('');
-  const [cardExpiry, setCardExpiry] = useState('');
-  const [cardCvc, setCardCvc] = useState('');
-  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
-
-  useEffect(() => {
-    const currentUser = getCurrentUser();
-    setUser(currentUser);
-    if (currentUser?.address) {
-      try {
-        const parsed = JSON.parse(currentUser.address);
-        setCity(parsed.city || '');
-        setDistrict(parsed.district || '');
-        setNeighborhood(parsed.neighborhood || '');
-        setStreet(parsed.street || '');
-        setApartment(parsed.apartment || '');
-        setDoorNo(parsed.doorNo || '');
-        setDirections(parsed.directions || '');
-      } catch (e) {
-        setStreet(currentUser.address);
-        setShowAddressForm(true);
-      }
-    } else if (currentUser) {
-      setShowAddressForm(true);
-    }
-  }, []);
+  const { cartItems, cartTotal, updateQuantity, removeFromCart } = useCart();
+  const router = useRouter();
 
   const handleCheckout = () => {
-    setErrorMsg('');
-    setSuccessMsg('');
-
+    const user = getCurrentUser();
     if (!user) {
-      setErrorMsg(t('Sipariş verebilmek için lütfen önce üye girişi yapın.'));
-      setTimeout(() => {
-        window.location.href = '/auth';
-      }, 2000);
-      return;
-    }
-
-    if (showAddressForm) {
-      if (
-        !city.trim() ||
-        !district.trim() ||
-        !neighborhood.trim() ||
-        !street.trim() ||
-        !apartment.trim() ||
-        !doorNo.trim() ||
-        !directions.trim()
-      ) {
-        setErrorMsg(t('Lütfen tüm adres alanlarını doldurun (İl, İlçe, Mahalle, Cadde/Sokak, Apartman, Daire No ve Kısa Tarif zorunludur).'));
-        return;
-      }
-
-      const detailedAddress = JSON.stringify({
-        city: city.trim(),
-        district: district.trim(),
-        neighborhood: neighborhood.trim(),
-        street: street.trim(),
-        apartment: apartment.trim(),
-        doorNo: doorNo.trim(),
-        directions: directions.trim(),
-      });
-
-      updateUserAddress(detailedAddress);
-      setShowAddressForm(false);
+      window.location.href = '/auth';
     } else {
-      if (!user.address) {
-        setShowAddressForm(true);
-        setErrorMsg(t('Lütfen teslimat adresinizi girin.'));
-        return;
-      }
-      try {
-        const parsed = JSON.parse(user.address);
-        if (
-          !parsed.city ||
-          !parsed.district ||
-          !parsed.neighborhood ||
-          !parsed.street ||
-          !parsed.apartment ||
-          !parsed.doorNo ||
-          !parsed.directions
-        ) {
-          setShowAddressForm(true);
-          setErrorMsg(t('Lütfen teslimat adresinizi eksiksiz doldurun.'));
-          return;
-        }
-      } catch {
-        setShowAddressForm(true);
-        setErrorMsg(t('Lütfen teslimat adresinizi eksiksiz doldurun.'));
-        return;
-      }
+      router.push('/checkout');
     }
-
-    // Proceed to ikas Virtual POS payment step
-    setShowPaymentStep(true);
   };
 
-  const handleProcessPayment = (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMsg('');
-    setSuccessMsg('');
+  if (cartItems.length === 0) {
+    return (
+      <div className="mx-auto max-w-4xl px-4 py-16 text-center">
+        <div className="mb-6 flex justify-center">
+          <div className="rounded-full bg-slate-50 p-6">
+            <ShoppingCart size={48} className="text-slate-300" />
+          </div>
+        </div>
+        <h1 className="mb-4 text-3xl font-extrabold text-slate-900">Sepetiniz Boş</h1>
+        <p className="mb-8 text-slate-500">Sepetinizde henüz ürün bulunmuyor.</p>
+        <Link href="/" className="inline-flex rounded bg-milwaukee px-8 py-3.5 font-bold text-white transition hover:bg-red-700">
+          Alışverişe Başla
+        </Link>
+      </div>
+    );
+  }
 
-    if (!cardHolder.trim() || !cardNumber.trim() || !cardExpiry.trim() || !cardCvc.trim()) {
-      setErrorMsg(t('Lütfen tüm kredi kartı bilgilerini doldurun.'));
-      return;
-    }
-
-    setIsProcessingPayment(true);
-
-    // Simulate ikas API query
-    setTimeout(() => {
-      const orderItems = cartItems.map((item) => ({
-        productId: item.productId,
-        name: item.name,
-        price: item.price,
-        quantity: item.quantity,
-      }));
-
-      const code = `ORD-${Math.floor(1000 + Math.random() * 9000)}`;
-      const newOrder = {
-        id: code,
-        date: new Date().toLocaleDateString('tr-TR'),
-        total: cartTotal,
-        items: orderItems,
-        status: 'Kargoya Verildi' as any,
-        trackingNumber: `MLW${Math.floor(100000000 + Math.random() * 900000000)}TR`,
-        cargoCompany: 'Yurtiçi Kargo'
-      };
-      
-      addOrderToCurrentUser(newOrder);
-      // Not calling saveGlobalOrder here because CartPage doesn't import it, but we can if we want to.
-      setIsProcessingPayment(false);
-      setSuccessMsg(t('Ödemeniz ikas Sanal POS ile başarıyla çekildi! Siparişiniz onaylandı...'));
-
-      setTimeout(() => {
-        clearCart();
-        window.location.href = '/hesabim';
-      }, 2000);
-    }, 2000);
-  };
+  // Calculate totals
+  const totalAmount = cartItems.reduce((acc, item) => {
+    const priceStr = item.price.replace(/[^\d]/g, '');
+    const price = parseInt(priceStr, 10);
+    return acc + (price * item.quantity);
+  }, 0);
+  
+  const formattedTotal = new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }).format(totalAmount);
 
   return (
-    <div className="space-y-10">
-      <section className="rounded-[28px] border border-slate-200 bg-white p-8 shadow-md">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-slate-500">{t('Sepet')}</p>
-            <h1 className="text-3xl font-semibold text-slate-900">{t('Sipariş Özeti')}</h1>
-          </div>
-          <div className="rounded-3xl bg-slate-100 px-4 py-3 text-sm text-slate-700 font-semibold">
-            {t('Toplam ürün')}: {cartCount}
-          </div>
+    <div className="mx-auto max-w-5xl px-4 py-10 md:py-16">
+      {/* Header */}
+      <div className="mb-8 flex items-center justify-between rounded bg-slate-900 px-6 py-4">
+        <div className="flex items-center gap-3">
+          <ShoppingCart className="text-white" size={24} />
+          <h1 className="text-xl font-bold text-white">Sepetim</h1>
         </div>
-      </section>
+      </div>
 
-      {errorMsg && (
-        <div className="rounded-3xl bg-red-500/10 p-5 text-sm font-semibold text-red-700 border border-red-500/20">
-          ⚠️ {errorMsg}
+      {/* Banner */}
+      <div className="mb-8 rounded border border-green-200 bg-green-50 p-5 shadow-sm">
+        <h2 className="mb-2 text-lg font-bold text-green-800">Siparişinizi teslim alın, %100 Güvenli Alışveriş!</h2>
+        <p className="text-sm text-green-700">
+          Kaswa Makine güvencesiyle siparişiniz özenle hazırlanıp en kısa sürede adresinize teslim edilecektir.
+        </p>
+      </div>
+
+      {/* Table */}
+      <div className="overflow-hidden rounded border border-slate-200 bg-white shadow-sm">
+        <div className="hidden grid-cols-12 items-center border-b border-slate-200 bg-slate-100 px-6 py-4 text-sm font-bold text-slate-700 md:grid">
+          <div className="col-span-1 text-center">Sil</div>
+          <div className="col-span-2">Ürün</div>
+          <div className="col-span-5">Ürün Adı</div>
+          <div className="col-span-2 text-center">Adet</div>
+          <div className="col-span-2 text-right">Tutar</div>
         </div>
-      )}
 
-      {successMsg && (
-        <div className="rounded-3xl bg-emerald-500/10 p-5 text-sm font-semibold text-emerald-700 border border-emerald-500/20">
-          ✓ {successMsg}
-        </div>
-      )}
-
-      {cartItems.length === 0 ? (
-        <section className="rounded-[28px] border border-dashed border-slate-200 bg-white p-10 text-center text-slate-500 shadow-sm">
-          <p className="text-xl font-semibold text-slate-900">{t('Sepetinizde ürün yok.')}</p>
-          <p className="mt-3 text-sm text-slate-400">
-            {t('Milwaukee ürün kataloğumuzu inceleyip sepetinize ekleme yapabilirsiniz.')}
-          </p>
-          <Link
-            href="/category"
-            className="mt-8 inline-flex rounded-3xl bg-milwaukee px-6 py-4 text-sm font-semibold uppercase tracking-[0.14em] text-white transition hover:bg-red-600 shadow"
-          >
-            {t('Ürünlere git')}
-          </Link>
-        </section>
-      ) : (
-        <div className="grid gap-6 xl:grid-cols-[1.4fr_0.6fr]">
-          <div className="space-y-5">
-            {cartItems.map((item) => (
-              <div key={item.productId} className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-md">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-3xl bg-slate-50 p-3 border border-slate-100">
-                      <Image
-                        src={item.image}
-                        alt={item.name}
-                        fill
-                        style={{ objectFit: 'contain' }}
-                        sizes="96px"
-                        className="rounded-2xl"
-                      />
-                    </div>
-                    <div>
-                      <h2 className="text-lg font-semibold text-slate-900">{item.name}</h2>
-                      <p className="mt-2 text-sm text-slate-500 font-semibold">{item.price}</p>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => removeFromCart(item.productId)}
-                    className="rounded-2xl bg-red-500/10 px-4 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-500/20"
-                  >
-                    {t('Ürünü kaldır')}
-                  </button>
-                </div>
-
-                <div className="mt-5 flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-slate-100 bg-slate-50 p-4">
-                  <div className="flex items-center gap-3">
-                    <button
-                      type="button"
-                      onClick={() => updateQuantity(item.productId, item.quantity - 1)}
-                      className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 transition hover:border-milwaukee"
-                      aria-label="Adeti azalt"
-                    >
-                      <Minus className="h-4 w-4" />
-                    </button>
-                    <span className="text-sm font-semibold text-slate-800">{item.quantity}</span>
-                    <button
-                      type="button"
-                      onClick={() => updateQuantity(item.productId, item.quantity + 1)}
-                      className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 transition hover:border-milwaukee"
-                      aria-label="Adeti artır"
-                    >
-                      <Plus className="h-4 w-4" />
-                    </button>
-                  </div>
-                  <div className="text-sm font-medium text-slate-700">
-                    {t('Ara toplam')}: {item.price}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <aside className="space-y-6">
-            <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-md">
-              <div className="space-y-5">
-                <div className="rounded-3xl bg-slate-50 border border-slate-100 p-5">
-                  <p className="text-xs uppercase tracking-[0.18em] text-slate-400 font-bold">{t('Sipariş Özeti')}</p>
-                  <div className="mt-4 space-y-3">
-                    <div className="flex items-center justify-between text-sm text-slate-600 font-medium">
-                      <span>{t('Ürün adedi')}</span>
-                      <span>{cartCount}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm text-slate-600 font-medium">
-                      <span>{t('Sepet toplamı')}</span>
-                      <span>{cartTotal}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {showPaymentStep ? (
-                  <form onSubmit={handleProcessPayment} className="rounded-3xl border border-milwaukee/20 bg-milwaukee/5 p-5 space-y-4">
-                    <p className="text-sm font-semibold text-slate-800 flex items-center gap-1.5 border-b border-slate-200/60 pb-2">
-                      💳 {t('ikas Sanal POS Ödeme Altyapısı')}
-                    </p>
-                    <p className="text-[11px] text-slate-500 font-medium leading-5">
-                      {t('Ödemeniz 256-bit SSL şifreleme ve ikas Sanal POS API entegrasyonu ile güvenli bir şekilde tahsil edilecektir.')}
-                    </p>
-                    <label className="flex flex-col text-xs font-semibold text-slate-500 gap-1.5">
-                      {t('Kart Sahibi')}
-                      <input
-                        type="text"
-                        required
-                        value={cardHolder}
-                        onChange={(e) => setCardHolder(e.target.value)}
-                        placeholder="Örn. Furkan Yılmaz"
-                        className="rounded-xl border border-slate-200 bg-white p-2.5 text-sm text-slate-900 outline-none focus:border-milwaukee"
-                      />
-                    </label>
-                    <label className="flex flex-col text-xs font-semibold text-slate-500 gap-1.5">
-                      {t('Kart Numarası')}
-                      <input
-                        type="text"
-                        required
-                        maxLength={19}
-                        value={cardNumber}
-                        onChange={(e) => setCardNumber(e.target.value.replace(/\s?/g, '').replace(/(\d{4})/g, '$1 ').trim())}
-                        placeholder="0000 0000 0000 0000"
-                        className="rounded-xl border border-slate-200 bg-white p-2.5 text-sm text-slate-900 outline-none focus:border-milwaukee"
-                      />
-                    </label>
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <label className="flex flex-col text-xs font-semibold text-slate-500 gap-1.5">
-                        {t('Son Kullanma Tarihi')}
-                        <input
-                          type="text"
-                          required
-                          maxLength={5}
-                          value={cardExpiry}
-                          onChange={(e) => setCardExpiry(e.target.value)}
-                          placeholder="AA/YY"
-                          className="rounded-xl border border-slate-200 bg-white p-2.5 text-sm text-slate-900 outline-none focus:border-milwaukee"
-                        />
-                      </label>
-                      <label className="flex flex-col text-xs font-semibold text-slate-500 gap-1.5">
-                        {t('Güvenlik Kodu (CVC)')}
-                        <input
-                          type="password"
-                          required
-                          maxLength={3}
-                          value={cardCvc}
-                          onChange={(e) => setCardCvc(e.target.value)}
-                          placeholder="000"
-                          className="rounded-xl border border-slate-200 bg-white p-2.5 text-sm text-slate-900 outline-none focus:border-milwaukee"
-                        />
-                      </label>
-                    </div>
-
-                    {isProcessingPayment ? (
-                      <div className="flex flex-col items-center justify-center py-4 space-y-2">
-                        <div className="h-6 w-6 animate-spin rounded-full border-2 border-milwaukee border-t-transparent" />
-                        <span className="text-xs text-slate-500 font-semibold">{t('ikas Sanal POS API sorgulanıyor...')}</span>
-                      </div>
-                    ) : (
-                      <button
-                        type="submit"
-                        className="w-full rounded-2xl bg-milwaukee py-3 text-sm font-semibold uppercase tracking-[0.14em] text-white transition hover:bg-red-600 shadow"
-                      >
-                        {t('ikas Sanal POS ile')} {cartTotal} {t('Öde')}
-                      </button>
-                    )}
-                  </form>
-                ) : (
-                  <>
-                    {showAddressForm && (
-                      <div className="rounded-3xl border border-milwaukee/20 bg-milwaukee/5 p-5 space-y-4">
-                        <p className="text-sm font-semibold text-slate-800 flex items-center gap-1.5 border-b border-slate-200/60 pb-2">
-                          <MapPin className="h-4 w-4 text-milwaukee animate-bounce" /> {t('Konum / Detaylı Teslimat Adresi')}
-                        </p>
-                        <div className="grid gap-3 sm:grid-cols-2">
-                          <label className="flex flex-col text-xs font-semibold text-slate-500 gap-1.5">
-                            {t('İl')}
-                            <input
-                              type="text"
-                              value={city}
-                              onChange={(e) => setCity(e.target.value)}
-                              placeholder="Örn. İstanbul"
-                              className="rounded-xl border border-slate-200 bg-white p-2.5 text-sm text-slate-900 outline-none focus:border-milwaukee"
-                            />
-                          </label>
-                          <label className="flex flex-col text-xs font-semibold text-slate-500 gap-1.5">
-                            {t('İlçe')}
-                            <input
-                              type="text"
-                              value={district}
-                              onChange={(e) => setDistrict(e.target.value)}
-                              placeholder="Örn. Kadıköy"
-                              className="rounded-xl border border-slate-200 bg-white p-2.5 text-sm text-slate-900 outline-none focus:border-milwaukee"
-                            />
-                          </label>
-                        </div>
-                        <div className="grid gap-3 sm:grid-cols-2">
-                          <label className="flex flex-col text-xs font-semibold text-slate-500 gap-1.5">
-                            {t('Mahalle')}
-                            <input
-                              type="text"
-                              value={neighborhood}
-                              onChange={(e) => setNeighborhood(e.target.value)}
-                              placeholder="Örn. Caferağa Mah."
-                              className="rounded-xl border border-slate-200 bg-white p-2.5 text-sm text-slate-900 outline-none focus:border-milwaukee"
-                            />
-                          </label>
-                          <label className="flex flex-col text-xs font-semibold text-slate-500 gap-1.5">
-                            {t('Cadde / Sokak')}
-                            <input
-                              type="text"
-                              value={street}
-                              onChange={(e) => setStreet(e.target.value)}
-                              placeholder="Örn. Moda Cad. No: 12"
-                              className="rounded-xl border border-slate-200 bg-white p-2.5 text-sm text-slate-900 outline-none focus:border-milwaukee"
-                            />
-                          </label>
-                        </div>
-                        <div className="grid gap-3 sm:grid-cols-2">
-                          <label className="flex flex-col text-xs font-semibold text-slate-500 gap-1.5">
-                            {t('Apartman Adı / Blok')}
-                            <input
-                              type="text"
-                              value={apartment}
-                              onChange={(e) => setApartment(e.target.value)}
-                              placeholder="Örn. Güneş Apt."
-                              className="rounded-xl border border-slate-200 bg-white p-2.5 text-sm text-slate-900 outline-none focus:border-milwaukee"
-                            />
-                          </label>
-                          <label className="flex flex-col text-xs font-semibold text-slate-500 gap-1.5">
-                            {t('Daire No')}
-                            <input
-                              type="text"
-                              value={doorNo}
-                              onChange={(e) => setDoorNo(e.target.value)}
-                              placeholder="Örn. 4"
-                              className="rounded-xl border border-slate-200 bg-white p-2.5 text-sm text-slate-900 outline-none focus:border-milwaukee"
-                            />
-                          </label>
-                        </div>
-                        <label className="flex flex-col text-xs font-semibold text-slate-500 gap-1.5">
-                          {t('Kısa Adres Tarifi / Yönlendirme')}
-                          <input
-                            type="text"
-                            value={directions}
-                            onChange={(e) => setDirections(e.target.value)}
-                            placeholder="Örn. Merkez cami yanı, market karşısı"
-                            className="rounded-xl border border-slate-200 bg-white p-2.5 text-sm text-slate-900 outline-none focus:border-milwaukee"
-                          />
-                        </label>
-                      </div>
-                    )}
-
-                    <Link
-                      href="/checkout"
-                      className="flex w-full justify-center rounded-3xl bg-milwaukee px-5 py-4 mt-4 text-sm font-semibold uppercase tracking-[0.14em] text-white transition hover:bg-red-600 shadow"
-                    >
-                      {t('Siparişi onayla')}
-                    </Link>
-                  </>
-                )}
+        <div className="divide-y divide-slate-100">
+          {cartItems.map((item) => (
+            <div key={item.productId} className="grid grid-cols-1 gap-4 p-4 md:grid-cols-12 md:items-center md:gap-0 md:px-6 md:py-5">
+              {/* Delete */}
+              <div className="col-span-1 flex justify-end md:justify-center">
                 <button
                   type="button"
-                  onClick={clearCart}
-                  className="w-full rounded-3xl bg-slate-100 px-5 py-4 text-sm font-semibold uppercase tracking-[0.14em] text-slate-700 transition hover:bg-slate-200"
+                  onClick={() => removeFromCart(item.productId)}
+                  className="rounded bg-red-100 p-2 text-red-600 transition hover:bg-red-200"
+                  title="Ürünü Sil"
                 >
-                  {t('Sepeti temizle')}
+                  <Trash2 size={20} />
                 </button>
               </div>
+
+              {/* Image */}
+              <div className="col-span-2 flex justify-center md:justify-start md:pl-4">
+                <div className="relative h-24 w-24 overflow-hidden rounded bg-slate-50">
+                  <Image src={item.image} alt={item.name} fill style={{ objectFit: 'contain' }} />
+                </div>
+              </div>
+
+              {/* Product Info */}
+              <div className="col-span-5 flex flex-col items-center text-center md:items-start md:text-left md:pr-4">
+                <Link href={`/urun/${item.productId}`} className="font-bold text-slate-800 hover:text-milwaukee">
+                  {item.name}
+                </Link>
+                <span className="mt-1 text-sm text-slate-500">Stok Kodu: {item.productId.substring(0, 8).toUpperCase()}</span>
+              </div>
+
+              {/* Quantity */}
+              <div className="col-span-2 flex items-center justify-center py-4 md:py-0">
+                <div className="flex h-10 w-28 items-center justify-between rounded border border-slate-200 bg-white px-2">
+                  <button
+                    type="button"
+                    onClick={() => updateQuantity(item.productId, item.quantity - 1)}
+                    className="flex h-full w-8 items-center justify-center text-slate-600 hover:text-milwaukee"
+                  >
+                    <Minus size={16} />
+                  </button>
+                  <span className="text-sm font-bold text-slate-900">{item.quantity}</span>
+                  <button
+                    type="button"
+                    onClick={() => updateQuantity(item.productId, item.quantity + 1)}
+                    className="flex h-full w-8 items-center justify-center text-slate-600 hover:text-milwaukee"
+                  >
+                    <Plus size={16} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Price */}
+              <div className="col-span-2 text-center text-lg font-extrabold text-slate-900 md:text-right">
+                {new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }).format(
+                  parseInt(item.price.replace(/[^\d]/g, ''), 10) * item.quantity
+                )}
+              </div>
             </div>
-          </aside>
+          ))}
         </div>
-      )}
+
+        {/* Totals & Actions */}
+        <div className="border-t border-slate-200 bg-slate-50 p-6 md:p-8">
+          <div className="mx-auto max-w-md md:mr-0 md:ml-auto">
+            <div className="space-y-4 text-sm">
+              <div className="flex justify-between font-semibold text-slate-600">
+                <span>Ürünler Toplamı:</span>
+                <span>{formattedTotal}</span>
+              </div>
+              <div className="flex justify-between font-semibold text-slate-600">
+                <span>Standart Kargo:</span>
+                <span>0 TL</span>
+              </div>
+              <div className="flex justify-between border-t border-slate-200 pt-4 text-xl font-extrabold text-slate-900">
+                <span>Toplam (KDV Dahil):</span>
+                <span>{formattedTotal}</span>
+              </div>
+            </div>
+
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-end">
+              <Link
+                href="/"
+                className="flex items-center justify-center rounded bg-[#f59e0b] px-6 py-4 text-sm font-bold text-white transition hover:bg-[#d97706]"
+              >
+                Alışverişe Devam Et
+              </Link>
+              <button
+                type="button"
+                onClick={handleCheckout}
+                className="flex items-center justify-center rounded bg-[#16a34a] px-8 py-4 text-sm font-bold text-white transition hover:bg-[#15803d]"
+              >
+                Sepeti Onayla
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

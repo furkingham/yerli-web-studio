@@ -1,7 +1,17 @@
+"use client";
+
+import { useEffect, useState } from 'react';
 import ProductCard from '../../components/ProductCard';
-import { products } from '../../data/products';
+import { Product } from '../../data/products';
+import { getAdminProducts } from '../../lib/admin';
 
 export default function ProductsPage() {
+  const [products, setProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    setProducts(getAdminProducts());
+  }, []);
+
   return (
     <div className="space-y-10">
       <section className="rounded-[28px] border border-slate-200 bg-white p-8 shadow-md">

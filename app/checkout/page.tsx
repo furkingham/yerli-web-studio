@@ -7,6 +7,7 @@ import { useCart } from '../../components/CartContext';
 import { MapPin, ChevronDown, ChevronUp, CheckCircle, Home } from 'lucide-react';
 import { saveGlobalOrder } from '../../lib/orders';
 import { OrderItem, getCurrentUser, addOrderToCurrentUser, updateUserAddress } from '../../lib/auth';
+import { iller, getIlceler } from '../../data/turkiye-lokasyonlari';
 
 export default function CheckoutPage() {
   const { cartItems, cartTotal, clearCart } = useCart();
@@ -15,7 +16,12 @@ export default function CheckoutPage() {
   const [addressSaved, setAddressSaved] = useState(false);
   const [step, setStep] = useState(1);
   const [orderCode, setOrderCode] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState<'credit_card' | 'bank_transfer'>('credit_card');
+  const [paymentMethod, setPaymentMethod] = useState<'credit_card' | 'bank_transfer' | 'pay_at_door_cc' | 'pay_at_door_cash' | 'get_quote'>('credit_card');
+
+  // Quote states
+  const [quoteNote, setQuoteNote] = useState('');
+  const [quotePhone, setQuotePhone] = useState('');
+  const [quoteEmail, setQuoteEmail] = useState('');
 
   // User state
   const [user, setUser] = useState<any>(null);
@@ -229,13 +235,37 @@ export default function CheckoutPage() {
                         {/* İl */}
                         <div className="space-y-1">
                           <label className="text-xs text-slate-500">İl Seçiniz *</label>
-                          <input type="text" value={newCity} onChange={e => setNewCity(e.target.value)} required placeholder="Örn: İstanbul" className="w-full rounded border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-milwaukee" />
+                          <select
+                            value={newCity}
+                            onChange={e => {
+                              setNewCity(e.target.value);
+                              setNewDistrict('');
+                            }}
+                            required
+                            className="w-full rounded border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-milwaukee appearance-none"
+                          >
+                            <option value="">İl Seçiniz</option>
+                            {iller.map((il) => (
+                              <option key={il} value={il}>{il}</option>
+                            ))}
+                          </select>
                         </div>
 
                         {/* İlçe */}
                         <div className="space-y-1">
                           <label className="text-xs text-slate-500">İlçe *</label>
-                          <input type="text" value={newDistrict} onChange={e => setNewDistrict(e.target.value)} required placeholder="Örn: Kadıköy" className="w-full rounded border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-milwaukee" />
+                          <select
+                            value={newDistrict}
+                            onChange={e => setNewDistrict(e.target.value)}
+                            required
+                            disabled={!newCity}
+                            className="w-full rounded border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-milwaukee appearance-none disabled:bg-slate-50"
+                          >
+                            <option value="">İlçe Seçiniz</option>
+                            {newCity && getIlceler(newCity).map((ilce) => (
+                              <option key={ilce} value={ilce}>{ilce}</option>
+                            ))}
+                          </select>
                         </div>
                       </div>
 
@@ -285,7 +315,7 @@ export default function CheckoutPage() {
               <div className="flex items-center gap-2 text-sm font-bold text-slate-900 mb-2">
                 <MapPin className="h-4 w-4 text-milwaukee" /> ÖDEME SEÇENEKLERİ
               </div>
-              <div className="rounded border border-slate-200 bg-white p-6 md:p-8 space-y-6">
+              <form onSubmit={handlePaymentSubmit} className="rounded border border-slate-200 bg-white p-6 md:p-8 space-y-6">
                 
                 {/* Havale / EFT Seçeneği */}
                 <div 
@@ -344,7 +374,7 @@ export default function CheckoutPage() {
                   )}
                 </div>
 
-                {/* Kredi Kartı Seçeneği */}
+                {/* Online Kredi Kartı Seçeneği */}
                 <div 
                   className={`rounded-lg border-2 p-4 cursor-pointer transition ${paymentMethod === 'credit_card' ? 'border-milwaukee bg-red-50/20' : 'border-slate-200 hover:border-slate-300'}`}
                   onClick={() => setPaymentMethod('credit_card')}
@@ -357,7 +387,7 @@ export default function CheckoutPage() {
                       onChange={() => setPaymentMethod('credit_card')}
                       className="h-4 w-4 text-milwaukee focus:ring-milwaukee cursor-pointer"
                     />
-                    <h3 className="font-bold text-slate-800 uppercase tracking-wider text-sm">KREDİ KARTI</h3>
+                    <h3 className="font-bold text-slate-800 uppercase tracking-wider text-sm">ONLİNE KREDİ KARTI</h3>
                   </div>
 
                   {paymentMethod === 'credit_card' && (
@@ -386,19 +416,109 @@ export default function CheckoutPage() {
                   )}
                 </div>
 
+                {/* Kapıda Kredi Kartı Seçeneği */}
+                <div 
+                  className={`rounded-lg border-2 p-4 cursor-pointer transition ${paymentMethod === 'pay_at_door_cc' ? 'border-milwaukee bg-red-50/20' : 'border-slate-200 hover:border-slate-300'}`}
+                  onClick={() => setPaymentMethod('pay_at_door_cc')}
+                >
+                  <div className="flex items-center gap-3">
+                    <input 
+                      type="radio" 
+                      name="paymentMethod" 
+                      checked={paymentMethod === 'pay_at_door_cc'} 
+                      onChange={() => setPaymentMethod('pay_at_door_cc')}
+                      className="h-4 w-4 text-milwaukee focus:ring-milwaukee cursor-pointer"
+                    />
+                    <h3 className="font-bold text-slate-800 uppercase tracking-wider text-sm">KAPIDA KREDİ KARTI İLE ÖDEME</h3>
+                  </div>
+                </div>
+
+                {/* Kapıda Nakit Seçeneği */}
+                <div 
+                  className={`rounded-lg border-2 p-4 cursor-pointer transition ${paymentMethod === 'pay_at_door_cash' ? 'border-milwaukee bg-red-50/20' : 'border-slate-200 hover:border-slate-300'}`}
+                  onClick={() => setPaymentMethod('pay_at_door_cash')}
+                >
+                  <div className="flex items-center gap-3">
+                    <input 
+                      type="radio" 
+                      name="paymentMethod" 
+                      checked={paymentMethod === 'pay_at_door_cash'} 
+                      onChange={() => setPaymentMethod('pay_at_door_cash')}
+                      className="h-4 w-4 text-milwaukee focus:ring-milwaukee cursor-pointer"
+                    />
+                    <h3 className="font-bold text-slate-800 uppercase tracking-wider text-sm">KAPIDA NAKİT ÖDEME</h3>
+                  </div>
+                </div>
+
+                {/* Teklif Al Seçeneği */}
+                <div 
+                  className={`rounded-lg border-2 p-4 cursor-pointer transition ${paymentMethod === 'get_quote' ? 'border-milwaukee bg-red-50/20' : 'border-slate-200 hover:border-slate-300'}`}
+                  onClick={() => setPaymentMethod('get_quote')}
+                >
+                  <div className="flex items-center gap-3">
+                    <input 
+                      type="radio" 
+                      name="paymentMethod" 
+                      checked={paymentMethod === 'get_quote'} 
+                      onChange={() => setPaymentMethod('get_quote')}
+                      className="h-4 w-4 text-milwaukee focus:ring-milwaukee cursor-pointer"
+                    />
+                    <h3 className="font-bold text-slate-800 uppercase tracking-wider text-sm">TEKLİF AL (KURUMSAL / B2B)</h3>
+                  </div>
+
+                  {paymentMethod === 'get_quote' && (
+                    <div className="mt-4 pt-4 border-t border-red-100">
+                      <div className="space-y-4">
+                        <div className="space-y-1">
+                          <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Telefon Numarası</label>
+                          <input 
+                            type="tel" 
+                            required={paymentMethod === 'get_quote'} 
+                            value={quotePhone}
+                            onChange={(e) => setQuotePhone(e.target.value)}
+                            placeholder="05XX XXX XX XX" 
+                            className="w-full rounded border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-milwaukee" 
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">E-posta Adresi</label>
+                          <input 
+                            type="email" 
+                            required={paymentMethod === 'get_quote'} 
+                            value={quoteEmail}
+                            onChange={(e) => setQuoteEmail(e.target.value)}
+                            placeholder="ornek@sirket.com" 
+                            className="w-full rounded border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-milwaukee" 
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Açıklama / Mesajınız</label>
+                          <textarea 
+                            required={paymentMethod === 'get_quote'} 
+                            value={quoteNote}
+                            onChange={(e) => setQuoteNote(e.target.value)}
+                            placeholder="Teklif detayları, şirket bilgileri vb." 
+                            rows={3}
+                            className="w-full rounded border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-milwaukee resize-none" 
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 <div className="pt-8 mt-6 border-t border-slate-100 flex items-center justify-between">
                   <button type="button" onClick={() => setStep(1)} className="text-sm font-bold text-slate-400 hover:text-slate-800 underline decoration-slate-300 underline-offset-4">
                     Geri Dön
                   </button>
                   <button 
-                    type="button" 
-                    onClick={handlePaymentSubmit}
+                    type="submit" 
                     className="md:w-1/2 rounded bg-milwaukee px-6 py-4 text-sm font-bold text-white transition hover:bg-red-700 shadow text-center"
                   >
                     ÖDEMEYİ TAMAMLA
                   </button>
                 </div>
-              </div>
+              </form>
             </>
           )}
 

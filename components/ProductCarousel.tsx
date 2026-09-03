@@ -4,7 +4,9 @@ import { useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
-import { products } from '../data/products';
+import { useEffect, useState } from 'react';
+import { Product } from '../data/products';
+import { getAdminProducts } from '../lib/admin';
 import { useLanguage } from './LanguageContext';
 import { useCart } from './CartContext';
 
@@ -12,6 +14,11 @@ export default function ProductCarousel({ title, category }: { title: string, ca
   const { t } = useLanguage();
   const { addToCart } = useCart();
   const carouselRef = useRef<HTMLDivElement>(null);
+  const [products, setProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    setProducts(getAdminProducts());
+  }, []);
 
   const scroll = (direction: 'left' | 'right') => {
     if (carouselRef.current) {

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { getCurrentUser } from '../../lib/auth';
+import { getGlobalOrders } from '../../lib/orders';
 import {
   getAdminProducts,
   saveAdminProducts,
@@ -86,6 +87,7 @@ export default function AdminPage() {
 
   const [products, setProducts] = useState<Product[]>([]);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [pendingOrders, setPendingOrders] = useState<any[]>([]);
   const [message, setMessage] = useState<string | null>(null);
   const [newProduct, setNewProduct] = useState<ProductForm>(initialProductForm);
   const [newCampaign, setNewCampaign] = useState(initialCampaignForm);
@@ -105,6 +107,10 @@ export default function AdminPage() {
     setAuthorized(true);
     setProducts(getAdminProducts());
     setCampaigns(getAdminCampaigns());
+
+    // Load pending orders from global orders
+    const allOrders = getGlobalOrders();
+    setPendingOrders(allOrders.filter(o => o.status === 'Sipariş Alındı'));
   }, []);
 
   const persistProducts = (nextProducts: Product[]) => {
@@ -168,8 +174,75 @@ export default function AdminPage() {
 
   const activeCampaign = useMemo(() => campaigns.find((campaign) => campaign.active), [campaigns]);
 
+  const handleApproveOrder = (orderId: string) => {
+    // Update in global orders localStorage
+    const ORDERS_KEY = 'milwaukee_all_orders';
+    const stored = window.localStorage.getItem(ORDERS_KEY);
+    if (stored) {
+      try {
+        const allOrders = JSON.parse(stored);
+        const updatedOrders = allOrders.map((o: any) =>
+          o.id === orderId ? { ...o, status: 'Hazırlanıyor' } : o
+        );
+        window.localStorage.setItem(ORDERS_KEY, JSON.stringify(updatedOrders));
+      } catch {}
+    }
+
+    // Update in user's personal orders (milwaukee_users)
+    const USER_STORAGE_KEY = 'milwaukee_users';
+    const usersRaw = window.localStorage.getItem(USER_STORAGE_KEY);
+    if (usersRaw) {
+      try {
+        const users = JSON.parse(usersRaw);
+        const updatedUsers = users.map((u: any) => ({
+          ...u,
+          orders: u.orders.map((o: any) =>
+            o.id === orderId ? { ...o, status: 'Hazırlanıyor' } : o
+          ),
+        }));
+        window.localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(updatedUsers));
+      } catch {}
+    }
+
+    // Remove from pending list
+    setPendingOrders(prev => prev.filter(o => o.id !== orderId));
+    setMessage(`Sipariş ${orderId} onaylandı.`);
+    setTimeout(() => setMessage(null), 3000);
+  };
+
   if (!authorized) {
-    return null;
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-slate-100 via-white to-slate-200">
+        <div className="mx-4 w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-8 shadow-xl text-center">
+          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-slate-900 shadow-lg">
+            <Image
+              src="/kaswa-logo.png"
+              alt="Kaswa Makine"
+              width={56}
+              height={56}
+              className="object-contain"
+              priority
+            />
+          </div>
+          <h1 className="text-2xl font-extrabold text-slate-900 mb-2">Yönetim paneli girişi</h1>
+          <p className="text-sm text-slate-500 mb-8 leading-relaxed">
+            Mağaza operasyonlarına erişmek için yönetici hesabınızla giriş yapın.
+          </p>
+          <a
+            href="/auth/admin"
+            className="block w-full rounded-xl bg-milwaukee px-6 py-3.5 text-sm font-bold text-white transition hover:bg-red-700 shadow-md shadow-red-900/20"
+          >
+            Yönetici olarak giriş yap
+          </a>
+          <a
+            href="/"
+            className="mt-4 block text-sm font-medium text-slate-400 hover:text-slate-600 transition"
+          >
+            Mağazaya dön
+          </a>
+        </div>
+      </div>
+    );
   }
 
   const renderProductsTab = () => (
@@ -338,63 +411,70 @@ export default function AdminPage() {
             </div>
           </div>
         );
-      case 'orders':
+      case 'orders': {
+        const allOrders = getGlobalOrders();
         return (
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-x-auto">
             <table className="min-w-full text-sm text-left">
               <thead className="bg-slate-50 border-b border-slate-200 text-slate-600">
                 <tr>
                   <th className="p-4 font-bold">Sipariş No</th>
-                  <th className="p-4 font-bold">Müşteri</th>
+                  <th className="p-4 font-bold">Ürünler</th>
                   <th className="p-4 font-bold">Tutar</th>
                   <th className="p-4 font-bold">Durum</th>
                   <th className="p-4 font-bold">Tarih</th>
                 </tr>
               </thead>
               <tbody>
-                <tr className="border-b border-slate-100">
-                  <td className="p-4 font-mono font-bold text-slate-900">ORD-7492</td>
-                  <td className="p-4 text-slate-600">Ahmet Yılmaz</td>
-                  <td className="p-4 font-bold text-milwaukee">19.498 TL</td>
-                  <td className="p-4"><span className="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-xs font-bold">Teslim Edildi</span></td>
-                  <td className="p-4 text-slate-500">20.08.2026</td>
-                </tr>
-                <tr className="border-b border-slate-100">
-                  <td className="p-4 font-mono font-bold text-slate-900">ORD-7501</td>
-                  <td className="p-4 text-slate-600">Mehmet Demir</td>
-                  <td className="p-4 font-bold text-milwaukee">4.499 TL</td>
-                  <td className="p-4"><span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-bold">Kargoya Verildi</span></td>
-                  <td className="p-4 text-slate-500">28.08.2026</td>
-                </tr>
-                <tr className="border-b border-slate-100">
-                  <td className="p-4 font-mono font-bold text-slate-900">ORD-7512</td>
-                  <td className="p-4 text-slate-600">Caner Çelik</td>
-                  <td className="p-4 font-bold text-milwaukee">14.999 TL</td>
-                  <td className="p-4"><span className="bg-amber-100 text-amber-700 px-2 py-1 rounded text-xs font-bold">Hazırlanıyor</span></td>
-                  <td className="p-4 text-slate-500">29.08.2026</td>
-                </tr>
+                {allOrders.length === 0 ? (
+                  <tr><td colSpan={5} className="p-4 text-center text-slate-500 italic">Henüz sipariş bulunmuyor.</td></tr>
+                ) : (
+                  allOrders.map(order => (
+                    <tr key={order.id} className="border-b border-slate-100">
+                      <td className="p-4 font-mono font-bold text-slate-900">{order.id}</td>
+                      <td className="p-4 text-slate-600">{order.items?.map((i: any) => i.name).join(', ')}</td>
+                      <td className="p-4 font-bold text-milwaukee">{order.total}</td>
+                      <td className="p-4">
+                        <span className={`px-2 py-1 rounded text-xs font-bold ${
+                          order.status === 'Teslim Edildi' ? 'bg-emerald-100 text-emerald-700' :
+                          order.status === 'Kargoya Verildi' ? 'bg-blue-100 text-blue-700' :
+                          order.status === 'Hazırlanıyor' ? 'bg-amber-100 text-amber-700' :
+                          'bg-slate-100 text-slate-700'
+                        }`}>{order.status || 'Sipariş Alındı'}</span>
+                      </td>
+                      <td className="p-4 text-slate-500">{order.date}</td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
         );
+      }
       case 'pending':
         return (
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
             <h3 className="font-bold text-slate-900 mb-4">Havale/EFT Onayı Bekleyen Siparişler</h3>
-            <div className="border border-slate-100 rounded-lg p-4 flex justify-between items-center mb-2">
-              <div>
-                <p className="font-bold text-slate-900">ORD-7514 <span className="text-slate-500 font-normal ml-2">Mustafa Kaya</span></p>
-                <p className="text-sm text-slate-500">Garanti Bankası - 2.500 TL</p>
+            {pendingOrders.length === 0 ? (
+              <p className="text-sm text-slate-500 italic">Onay bekleyen sipariş bulunmuyor.</p>
+            ) : (
+              <div className="space-y-2">
+                {pendingOrders.map(order => (
+                  <div key={order.id} className="border border-slate-100 rounded-lg p-4 flex justify-between items-center">
+                    <div>
+                      <p className="font-bold text-slate-900">{order.id} <span className="text-slate-500 font-normal ml-2">{order.items?.map((i: any) => i.name).join(', ')}</span></p>
+                      <p className="text-sm text-slate-500">{order.date} - {order.total}</p>
+                    </div>
+                    <button
+                      onClick={() => handleApproveOrder(order.id)}
+                      className="bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-emerald-600 transition"
+                    >
+                      Onayla
+                    </button>
+                  </div>
+                ))}
               </div>
-              <button className="bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-bold">Onayla</button>
-            </div>
-            <div className="border border-slate-100 rounded-lg p-4 flex justify-between items-center">
-              <div>
-                <p className="font-bold text-slate-900">ORD-7515 <span className="text-slate-500 font-normal ml-2">Ali Veli</span></p>
-                <p className="text-sm text-slate-500">Ziraat Bankası - 8.250 TL</p>
-              </div>
-              <button className="bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-bold">Onayla</button>
-            </div>
+            )}
           </div>
         );
       case 'customers':
