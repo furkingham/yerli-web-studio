@@ -109,13 +109,13 @@ export default function Header() {
             <div className="flex items-center gap-2 lg:gap-8">
 
               {/* Logo */}
-              <Link href="/" className="flex-shrink-0 py-2 flex items-center">
+              <Link href="/" className="flex-shrink-0 rounded-md bg-white px-2 py-1.5 shadow-sm sm:px-3">
                 <Image
                   src="/kaswa-logo.png"
                   alt="Kaswa Makine Logo"
                   width={240}
                   height={100}
-                  className="h-12 sm:h-16 w-auto object-contain"
+                  className="h-10 sm:h-14 w-auto object-contain"
                   priority
                 />
               </Link>

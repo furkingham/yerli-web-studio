@@ -251,7 +251,10 @@ export default function AdminPage() {
       
       <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-slate-900">Ürün Listesi</h2>
+          <div>
+            <h2 className="text-xl font-bold text-slate-900">Ürün Listesi</h2>
+            <p className="mt-1 text-xs text-slate-500">Fiyat alanını değiştirdiğiniz anda tarayıcıya kaydedilir ve mağaza sayfalarında kullanılır.</p>
+          </div>
           <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-700">Toplam: {products.length}</span>
         </div>
         

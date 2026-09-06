@@ -137,20 +137,20 @@ export default function CheckoutPage() {
         </div>
       )}
 
-      <div className={`grid gap-12 ${step === 3 ? 'max-w-4xl mx-auto' : 'lg:grid-cols-12'}`}>
+      <div className={`grid min-w-0 gap-6 sm:gap-8 lg:gap-12 ${step === 3 ? 'mx-auto max-w-4xl' : 'lg:grid-cols-12'}`}>
         {/* Left: Form Area */}
-        <div className={step === 3 ? 'space-y-6' : 'lg:col-span-8 space-y-6'}>
+        <div className={step === 3 ? 'min-w-0 space-y-6' : 'min-w-0 space-y-6 lg:col-span-8'}>
           
           {/* Steps */}
           {step !== 3 && (
-            <div className="flex gap-4 mb-8">
-              <div className={`flex items-center gap-3 rounded border px-6 py-4 flex-1 ${step === 1 ? 'border-milwaukee bg-white' : 'border-slate-200 bg-slate-50 opacity-60'}`}>
+            <div className="mb-8 grid gap-3 sm:flex sm:gap-4">
+              <div className={`flex min-w-0 flex-1 items-center gap-3 rounded border px-4 py-3 sm:px-6 sm:py-4 ${step === 1 ? 'border-milwaukee bg-white' : 'border-slate-200 bg-slate-50 opacity-60'}`}>
                 <span className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${step === 1 ? 'bg-milwaukee text-white' : 'bg-slate-300 text-slate-500'}`}>1</span>
-                <span className={`font-bold text-sm ${step === 1 ? 'text-milwaukee' : 'text-slate-500'}`}>ADRES BİLGİLERİ</span>
+                <span className={`min-w-0 text-xs font-bold sm:text-sm ${step === 1 ? 'text-milwaukee' : 'text-slate-500'}`}>ADRES BİLGİLERİ</span>
               </div>
-              <div className={`flex items-center gap-3 rounded border px-6 py-4 flex-1 ${step === 2 ? 'border-milwaukee bg-white' : 'border-slate-200 bg-transparent opacity-50'}`}>
+              <div className={`flex min-w-0 flex-1 items-center gap-3 rounded border px-4 py-3 sm:px-6 sm:py-4 ${step === 2 ? 'border-milwaukee bg-white' : 'border-slate-200 bg-transparent opacity-50'}`}>
                 <span className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${step === 2 ? 'bg-milwaukee text-white' : 'bg-slate-200 text-slate-500'}`}>2</span>
-                <span className={`font-bold text-sm ${step === 2 ? 'text-milwaukee' : 'text-slate-500'}`}>ÖDEME BİLGİLERİ</span>
+                <span className={`min-w-0 text-xs font-bold sm:text-sm ${step === 2 ? 'text-milwaukee' : 'text-slate-500'}`}>ÖDEME BİLGİLERİ</span>
               </div>
             </div>
           )}
@@ -315,7 +315,7 @@ export default function CheckoutPage() {
               <div className="flex items-center gap-2 text-sm font-bold text-slate-900 mb-2">
                 <MapPin className="h-4 w-4 text-milwaukee" /> ÖDEME SEÇENEKLERİ
               </div>
-              <form onSubmit={handlePaymentSubmit} className="rounded border border-slate-200 bg-white p-6 md:p-8 space-y-6">
+              <form onSubmit={handlePaymentSubmit} className="min-w-0 space-y-6 rounded border border-slate-200 bg-white p-4 sm:p-6 md:p-8">
                 
                 {/* Havale / EFT Seçeneği */}
                 <div 

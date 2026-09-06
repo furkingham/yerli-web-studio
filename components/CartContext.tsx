@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import type { Product } from '../data/products';
+import { getAdminProducts } from '../lib/admin';
 
 export type CartItem = {
   productId: string;
@@ -39,6 +40,7 @@ const formatPrice = (value: number) => `${Math.round(value).toLocaleString('tr-T
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [cartHydrated, setCartHydrated] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -47,18 +49,43 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       if (stored) {
         const parsed = JSON.parse(stored) as CartItem[];
         if (Array.isArray(parsed)) {
-          setCartItems(parsed);
+          const currentProducts = getAdminProducts();
+          const refreshed = parsed.map((item) => {
+            const current = currentProducts.find((product) => product.id === item.productId);
+            return current
+              ? { ...item, name: current.name, price: current.price, image: current.image || item.image, slug: current.slug }
+              : item;
+          });
+          setCartItems(refreshed);
         }
       }
     } catch (error) {
       console.warn('Sepet yüklenemedi:', error);
+    } finally {
+      setCartHydrated(true);
     }
   }, []);
 
   useEffect(() => {
+    const refreshCartPrices = () => {
+      const currentProducts = getAdminProducts();
+      setCartItems((items) => items.map((item) => {
+        const current = currentProducts.find((product) => product.id === item.productId);
+        return current
+          ? { ...item, name: current.name, price: current.price, image: current.image || item.image, slug: current.slug }
+          : item;
+      }));
+    };
+
+    window.addEventListener('storage', refreshCartPrices);
+    return () => window.removeEventListener('storage', refreshCartPrices);
+  }, []);
+
+  useEffect(() => {
     if (typeof window === 'undefined') return;
+    if (!cartHydrated) return;
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(cartItems));
-  }, [cartItems]);
+  }, [cartItems, cartHydrated]);
 
   const cartCount = useMemo(() => cartItems.reduce((sum, item) => sum + item.quantity, 0), [cartItems]);
 

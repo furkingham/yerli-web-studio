@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import SearchBar from '../components/SearchBar';
-import CampaignBanner from '../components/CampaignBanner';
+import HeroSlider from '../components/HeroSlider';
 import { ShoppingBag, ShieldCheck, Building, Star, ArrowRight } from 'lucide-react';
 import { useLanguage } from '../components/LanguageContext';
 import { Product } from '../data/products';
@@ -11,6 +11,7 @@ import { getAdminProducts } from '../lib/admin';
 import { useState, useEffect } from 'react';
 
 import ProductCarousel from '../components/ProductCarousel';
+import CategoryShowcase from '../components/CategoryShowcase';
 
 const heroBackgroundImage = 'https://placehold.co/1800x800/1a1a1a/db0000?text=Milwaukee+Heavy+Duty';
 
@@ -30,10 +31,9 @@ export default function HomePage() {
 
   return (
     <div className="space-y-8">
-      <CampaignBanner />
+      <HeroSlider />
 
-
-
+      <CategoryShowcase />
       {/* Horizontal Search Banner */}
       <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-md">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { getProductBySlug, products } from '../../../data/products';
-import ProductView from '../../../components/ProductView';
+import ManagedProductView from '../../../components/ManagedProductView';
 
 export function generateStaticParams() {
   return products.map((product) => ({
@@ -53,7 +53,7 @@ export default function ProductPage({ params }: { params?: { slug?: string } }) 
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <ProductView product={product} />
+      <ManagedProductView slug={slug} />
     </>
   );
 }

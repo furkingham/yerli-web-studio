@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Facebook, Youtube, Instagram, ChevronRight, Check } from 'lucide-react';
 import { useLanguage } from './LanguageContext';
 
@@ -62,6 +63,18 @@ export default function Footer() {
       <div className="bg-[#202020] py-12 text-slate-300">
         <div className="mx-auto max-w-screen-2xl px-4 lg:px-8">
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:grid-cols-5">
+            <div className="col-span-2 space-y-4 sm:col-span-3 lg:col-span-5">
+              <Link href="/" className="inline-flex rounded-md bg-white px-3 py-2 shadow-sm">
+                <Image
+                  src="/kaswa-logo.png"
+                  alt="Kaswa Makine Logo"
+                  width={220}
+                  height={147}
+                  className="h-16 w-auto object-contain"
+                />
+              </Link>
+            </div>
+
             {/* Column 1: KATEGORİLER */}
             <div className="space-y-4">
               <h3 className="text-xs font-bold uppercase tracking-wider text-white">

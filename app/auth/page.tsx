@@ -136,8 +136,25 @@ export default function AuthPage() {
     }
   };
 
-  const handleGoogleSignIn = () => {
-    signIn('google', { callbackUrl: '/auth' });
+  const handleGoogleSignIn = async () => {
+    setError(null);
+    setSuccess(null);
+    setLoading(true);
+
+    const result = await signIn('google', {
+      callbackUrl: '/hesabim',
+      redirect: false,
+    });
+
+    if (result?.error) {
+      setError('Google ile giriş başlatılamadı. Lütfen tekrar deneyin veya site yöneticisinin Google OAuth ayarlarını kontrol etmesini isteyin.');
+      setLoading(false);
+      return;
+    }
+
+    if (result?.url) {
+      window.location.href = result.url;
+    }
   };
 
   const handleResetPassword = async () => {
