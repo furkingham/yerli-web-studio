@@ -109,9 +109,9 @@ export default function Header() {
             <div className="flex items-center gap-2 lg:gap-8">
 
               {/* Logo */}
-              <Link href="/" className="flex-shrink-0 rounded-md bg-white px-2 py-1.5 shadow-sm sm:px-3">
+              <Link href="/" className="flex-shrink-0 py-2 sm:py-3 flex items-center">
                 <Image
-                  src="/kaswa-logo.png"
+                  src="/kaswa-logo-v2.png"
                   alt="Kaswa Makine Logo"
                   width={240}
                   height={100}
@@ -330,19 +330,50 @@ export default function Header() {
                 </div>
                 <ChevronRight className="h-5 w-5 text-slate-400" />
               </button>
+
+              <button
+                onClick={() => { setMenuOpen(false); router.push('/favorilerim'); }}
+                className="flex w-full items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 px-5 py-4 text-left text-base font-semibold text-slate-700 transition hover:border-milwaukee hover:text-milwaukee hover:bg-slate-100/40"
+              >
+                <div className="flex items-center gap-3">
+                  <Heart className="h-5 w-5" />
+                  <span>{t('Favorilerim')}</span>
+                </div>
+                <ChevronRight className="h-5 w-5 text-slate-400" />
+              </button>
+
+              <div className="h-px bg-slate-200 my-4" />
+              <p className="px-1 text-xs uppercase tracking-[0.22em] text-slate-500 font-semibold mb-2">{t('İletişim')}</p>
+              
+              <a
+                href="mailto:destek@kaswamakine.com"
+                className="flex w-full items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 px-5 py-4 text-left text-base font-semibold text-slate-700 transition hover:border-milwaukee hover:text-milwaukee hover:bg-slate-100/40"
+              >
+                <div className="flex items-center gap-3">
+                  <Mail className="h-5 w-5" />
+                  <span>destek@kaswamakine.com</span>
+                </div>
+              </a>
+              
+              <a
+                href="tel:+905555555555"
+                className="flex w-full items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 px-5 py-4 text-left text-base font-semibold text-slate-700 transition hover:border-milwaukee hover:text-milwaukee hover:bg-slate-100/40"
+              >
+                <div className="flex items-center gap-3">
+                  <Phone className="h-5 w-5" />
+                  <span>+90 555 555 55 55</span>
+                </div>
+              </a>
             </div>
 
-            <div className="p-6 border-t border-slate-100 bg-slate-50">
-              <div className="flex items-center gap-3">
-                <Image
-                  src="/milwaukee-logo.jpg"
-                  alt="Milwaukee Logo"
-                  width={140}
-                  height={40}
-                  className="h-8 w-auto object-contain"
-                />
-                <span className="text-xs text-slate-400 font-medium">Kaswa Makina</span>
-              </div>
+            <div className="p-6 border-t border-slate-100 bg-slate-50 flex items-center gap-4">
+              <Image
+                src="/kaswa-logo-v2.png"
+                alt="Kaswa Makina Logo"
+                width={140}
+                height={60}
+                className="h-10 w-auto object-contain"
+              />
             </div>
           </aside>
         </div>

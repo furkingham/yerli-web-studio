@@ -8,7 +8,7 @@ const collections = [
     subtitle: 'Profesyonel akülü güç',
     description: 'Zorlu uygulamalar için yüksek performans.',
     href: '/category?category=Akülü%20Aletler',
-    image: 'https://placehold.co/900x620/1a1a1a/ffffff?text=M18+SER%C4%B0S%C4%B0',
+    image: 'https://cdtmilwaukee.com/Data/Kategori/41.jpg',
     className: 'md:col-span-2',
   },
   {
@@ -16,7 +16,7 @@ const collections = [
     subtitle: 'Kompakt ve güçlü',
     description: 'Dar alanlarda hassas kontrol.',
     href: '/category?category=Akülü%20Aletler',
-    image: 'https://placehold.co/700x620/db0000/ffffff?text=M12+SER%C4%B0S%C4%B0',
+    image: 'https://cdtmilwaukee.com/Data/Kategori/39.jpg',
     className: '',
   },
   {
@@ -24,7 +24,7 @@ const collections = [
     subtitle: 'Günlük profesyonel çözümler',
     description: 'Dayanıklı aksesuar ve el aletleri.',
     href: '/category?category=El%20Aletleri',
-    image: 'https://placehold.co/700x620/30343a/ffffff?text=EL+ALETLER%C4%B0',
+    image: 'https://cdtmilwaukee.com/Data/Kategori/64.jpg',
     className: '',
   },
   {
@@ -32,7 +32,7 @@ const collections = [
     subtitle: 'Sahada güvenli çalışma',
     description: 'Koruyucu ekipman ve profesyonel donanım.',
     href: '/category?category=İş%20Güvenliği',
-    image: 'https://placehold.co/900x620/f59e0b/1a1a1a?text=%C4%B0%C5%9E+G%C3%9CVENL%C4%B0%C4%9E%C4%B0',
+    image: 'https://cdtmilwaukee.com/Data/Kategori/40.jpg',
     className: 'md:col-span-2',
   },
 ];

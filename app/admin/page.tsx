@@ -216,7 +216,7 @@ export default function AdminPage() {
         <div className="mx-4 w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-8 shadow-xl text-center">
           <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-slate-900 shadow-lg">
             <Image
-              src="/kaswa-logo.png"
+              src="/kaswa-logo-v2.png"
               alt="Kaswa Makine"
               width={56}
               height={56}
@@ -350,6 +350,63 @@ export default function AdminPage() {
     <div className="space-y-6">
       {message && <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/20 p-4 text-sm text-emerald-700 font-semibold">{message}</div>}
 
+      {/* DÖVİZ KURU AYARLARI */}
+      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 className="text-xl font-bold text-slate-900 mb-6">Döviz Kuru Ayarları</h2>
+        <div className="space-y-4">
+          <p className="text-xs text-slate-500">Ürünlerde taban fiyatları Dolar veya Euro olan ürünlerin TL karşılıkları otomatik olarak bu kurlara göre hesaplanır.</p>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1">USD (Dolar) Kuru (TL)</label>
+              <input 
+                type="number" 
+                step="0.01"
+                id="usd-rate-input"
+                defaultValue={(() => {
+                  try {
+                    const r = JSON.parse(localStorage.getItem('milwaukee_exchange_rates') || '{"USD":33.5,"EUR":36.8}');
+                    return r.USD;
+                  } catch { return 33.5; }
+                })()}
+                className="w-full rounded border border-slate-300 p-2 outline-none focus:border-blue-500" 
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1">EUR (Euro) Kuru (TL)</label>
+              <input 
+                type="number" 
+                step="0.01"
+                id="eur-rate-input"
+                defaultValue={(() => {
+                  try {
+                    const r = JSON.parse(localStorage.getItem('milwaukee_exchange_rates') || '{"USD":33.5,"EUR":36.8}');
+                    return r.EUR;
+                  } catch { return 36.8; }
+                })()}
+                className="w-full rounded border border-slate-300 p-2 outline-none focus:border-blue-500" 
+              />
+            </div>
+          </div>
+          <button 
+            type="button" 
+            onClick={() => {
+              const usd = parseFloat((document.getElementById('usd-rate-input') as HTMLInputElement).value);
+              const eur = parseFloat((document.getElementById('eur-rate-input') as HTMLInputElement).value);
+              if (usd > 0 && eur > 0) {
+                localStorage.setItem('milwaukee_exchange_rates', JSON.stringify({ USD: usd, EUR: eur }));
+                window.dispatchEvent(new Event('exchange_rates_updated')); // Global update
+                setMessage('Döviz kurları başarıyla güncellendi!');
+                setTimeout(() => setMessage(null), 3000);
+              }
+            }}
+            className="rounded bg-milwaukee px-4 py-2 font-semibold text-white hover:bg-red-700 transition"
+          >
+            Kurları Güncelle
+          </button>
+        </div>
+      </div>
+
+      {/* KAMPANYA AYARLARI */}
       <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="text-xl font-bold text-slate-900 mb-6">Kampanya Ayarları</h2>
         <form onSubmit={handleAddCampaign} className="space-y-4">
@@ -623,7 +680,7 @@ export default function AdminPage() {
             <div className="flex items-center gap-1.5 sm:gap-3">
               <div className="flex items-center">
                 <Image
-                  src="/kaswa-logo.png"
+                  src="/kaswa-logo-v2.png"
                   alt="Kaswa Makine Logo"
                   width={144}
                   height={60}

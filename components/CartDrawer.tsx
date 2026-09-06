@@ -1,12 +1,21 @@
 'use client';
 
+import { useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Minus, Plus, ShoppingCart, Trash2, X } from 'lucide-react';
 import { useCart } from './CartContext';
+import { useCurrency } from './CurrencyContext';
 
 export default function CartDrawer() {
   const { drawerOpen, closeDrawer, cartItems, cartTotal, cartCount, updateQuantity, removeFromCart, clearCart } = useCart();
+  const { formatPrice } = useCurrency();
+
+  useEffect(() => {
+    if (drawerOpen) document.body.style.overflow = 'hidden';
+    else document.body.style.overflow = '';
+    return () => { document.body.style.overflow = ''; };
+  }, [drawerOpen]);
 
   if (!drawerOpen) {
     return null;
@@ -48,7 +57,7 @@ export default function CartDrawer() {
                       <div className="flex items-start justify-between gap-3">
                         <div>
                           <h3 className="text-sm font-semibold text-white">{item.name}</h3>
-                          <p className="mt-2 text-sm text-slate-400">{item.price}</p>
+                          <p className="mt-2 text-sm text-slate-400">{formatPrice(item)}</p>
                         </div>
                         <button
                           type="button"

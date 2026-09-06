@@ -9,10 +9,12 @@ import { Product } from '../data/products';
 import { getAdminProducts } from '../lib/admin';
 import { useLanguage } from './LanguageContext';
 import { useCart } from './CartContext';
+import { useCurrency } from './CurrencyContext';
 
 export default function ProductCarousel({ title, category }: { title: string, category?: string }) {
   const { t } = useLanguage();
   const { addToCart } = useCart();
+  const { formatPrice, calculatePriceTL } = useCurrency();
   const carouselRef = useRef<HTMLDivElement>(null);
   const [products, setProducts] = useState<Product[]>([]);
 
@@ -49,7 +51,7 @@ export default function ProductCarousel({ title, category }: { title: string, ca
         {/* Left Arrow */}
         <button
           onClick={() => scroll('left')}
-          className="absolute left-0 top-1/2 -translate-y-1/2 -ml-3 sm:-ml-5 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-md border border-slate-200 text-slate-600 hover:text-milwaukee hover:scale-110 transition opacity-80 hover:opacity-100"
+          className="absolute left-0 sm:-ml-5 top-1/2 -translate-y-1/2 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-md border border-slate-200 text-slate-600 hover:text-milwaukee hover:scale-110 transition opacity-80 hover:opacity-100"
           aria-label="Önceki"
         >
           <ChevronLeft className="h-6 w-6" />
@@ -103,9 +105,9 @@ export default function ProductCarousel({ title, category }: { title: string, ca
                   <div>
                     {/* Old price mock (just to match design) */}
                     <span className="text-[10px] text-slate-400 line-through block">
-                      {(parseFloat(product.price.replace(/[^\d.,]/g, '')) * 1.4).toFixed(3)} TL
+                      {new Intl.NumberFormat('tr-TR').format(Math.round(calculatePriceTL(product) * 1.4))} TL
                     </span>
-                    <p className="text-base font-bold text-slate-900">{product.price}</p>
+                    <p className="text-base font-bold text-slate-900">{formatPrice(product)}</p>
                   </div>
                   <button
                     onClick={(e) => {
@@ -126,7 +128,7 @@ export default function ProductCarousel({ title, category }: { title: string, ca
         {/* Right Arrow */}
         <button
           onClick={() => scroll('right')}
-          className="absolute right-0 top-1/2 -translate-y-1/2 -mr-3 sm:-mr-5 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-md border border-slate-200 text-slate-600 hover:text-milwaukee hover:scale-110 transition opacity-80 hover:opacity-100"
+          className="absolute right-0 sm:-mr-5 top-1/2 -translate-y-1/2 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-md border border-slate-200 text-slate-600 hover:text-milwaukee hover:scale-110 transition opacity-80 hover:opacity-100"
           aria-label="Sonraki"
         >
           <ChevronRight className="h-6 w-6" />

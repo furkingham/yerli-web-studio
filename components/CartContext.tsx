@@ -3,12 +3,15 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import type { Product } from '../data/products';
 import { getAdminProducts } from '../lib/admin';
+import { useCurrency } from './CurrencyContext';
 
 export type CartItem = {
   productId: string;
   slug: string;
   name: string;
   price: string;
+  basePrice?: number;
+  currency?: 'TL' | 'USD' | 'EUR';
   image: string;
   quantity: number;
 };
@@ -30,17 +33,12 @@ type CartContextType = {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 const STORAGE_KEY = 'milwaukee_cart';
 
-const parsePrice = (price: string) => {
-  const cleaned = price.replace(/\./g, '').replace(',', '.').replace(/[^\d.]/g, '');
-  return Number(cleaned) || 0;
-};
-
-const formatPrice = (value: number) => `${Math.round(value).toLocaleString('tr-TR')} TL`;
-
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [cartHydrated, setCartHydrated] = useState(false);
+
+  const { calculatePriceTL } = useCurrency();
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -53,66 +51,56 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           const refreshed = parsed.map((item) => {
             const current = currentProducts.find((product) => product.id === item.productId);
             return current
-              ? { ...item, name: current.name, price: current.price, image: current.image || item.image, slug: current.slug }
+              ? {
+                  ...item,
+                  name: current.name,
+                  price: current.price,
+                  basePrice: current.basePrice,
+                  currency: current.currency,
+                  image: current.image || item.image,
+                  slug: current.slug,
+                }
               : item;
           });
           setCartItems(refreshed);
         }
       }
-    } catch (error) {
-      console.warn('Sepet yüklenemedi:', error);
-    } finally {
-      setCartHydrated(true);
+    } catch (e) {
+      console.warn('Failed to parse cart storage', e);
     }
+    setCartHydrated(true);
   }, []);
 
   useEffect(() => {
-    const refreshCartPrices = () => {
-      const currentProducts = getAdminProducts();
-      setCartItems((items) => items.map((item) => {
-        const current = currentProducts.find((product) => product.id === item.productId);
-        return current
-          ? { ...item, name: current.name, price: current.price, image: current.image || item.image, slug: current.slug }
-          : item;
-      }));
-    };
-
-    window.addEventListener('storage', refreshCartPrices);
-    return () => window.removeEventListener('storage', refreshCartPrices);
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    if (!cartHydrated) return;
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(cartItems));
+    if (cartHydrated) {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(cartItems));
+    }
   }, [cartItems, cartHydrated]);
 
-  const cartCount = useMemo(() => cartItems.reduce((sum, item) => sum + item.quantity, 0), [cartItems]);
+  const cartCount = useMemo(() => cartItems.reduce((acc, item) => acc + item.quantity, 0), [cartItems]);
 
-  const cartTotal = useMemo(() => {
-    const total = cartItems.reduce((sum, item) => sum + parsePrice(item.price) * item.quantity, 0);
-    return formatPrice(total);
-  }, [cartItems]);
+  const cartTotalValue = useMemo(() => {
+    return cartItems.reduce((acc, item) => acc + calculatePriceTL(item) * item.quantity, 0);
+  }, [cartItems, calculatePriceTL]);
+
+  const cartTotal = `${Math.round(cartTotalValue).toLocaleString('tr-TR')} TL`;
 
   const addToCart = (product: Product, quantity = 1) => {
-    setCartItems((current) => {
-      const existing = current.find((item) => item.productId === product.id);
+    setCartItems((prev) => {
+      const existing = prev.find((item) => item.productId === product.id);
       if (existing) {
-        return current.map((item) =>
-          item.productId === product.id
-            ? { ...item, quantity: item.quantity + quantity }
-            : item,
-        );
+        return prev.map((item) => (item.productId === product.id ? { ...item, quantity: item.quantity + quantity } : item));
       }
-
       return [
-        ...current,
+        ...prev,
         {
           productId: product.id,
           slug: product.slug,
           name: product.name,
           price: product.price,
-          image: product.image || 'https://placehold.co/800x800/db0000/ffffff?text=Milwaukee',
+          basePrice: product.basePrice,
+          currency: product.currency,
+          image: product.image || 'https://placehold.co/400x400/ffffff/db0000?text=Milwaukee',
           quantity,
         },
       ];
@@ -121,21 +109,19 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   const updateQuantity = (productId: string, quantity: number) => {
-    setCartItems((current) =>
-      current
-        .map((item) => (item.productId === productId ? { ...item, quantity } : item))
-        .filter((item) => item.quantity > 0),
-    );
+    if (quantity < 1) return removeFromCart(productId);
+    setCartItems((prev) => prev.map((item) => (item.productId === productId ? { ...item, quantity } : item)));
   };
 
   const removeFromCart = (productId: string) => {
-    setCartItems((current) => current.filter((item) => item.productId !== productId));
+    setCartItems((prev) => prev.filter((item) => item.productId !== productId));
   };
 
   const clearCart = () => setCartItems([]);
+
   const openDrawer = () => setDrawerOpen(true);
   const closeDrawer = () => setDrawerOpen(false);
-  const toggleDrawer = () => setDrawerOpen((open) => !open);
+  const toggleDrawer = () => setDrawerOpen((prev) => !prev);
 
   return (
     <CartContext.Provider

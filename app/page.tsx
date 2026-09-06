@@ -2,13 +2,13 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import SearchBar from '../components/SearchBar';
 import HeroSlider from '../components/HeroSlider';
 import { ShoppingBag, ShieldCheck, Building, Star, ArrowRight } from 'lucide-react';
 import { useLanguage } from '../components/LanguageContext';
 import { Product } from '../data/products';
 import { getAdminProducts } from '../lib/admin';
 import { useState, useEffect } from 'react';
+import { useCurrency } from '../components/CurrencyContext';
 
 import ProductCarousel from '../components/ProductCarousel';
 import CategoryShowcase from '../components/CategoryShowcase';
@@ -17,6 +17,7 @@ const heroBackgroundImage = 'https://placehold.co/1800x800/1a1a1a/db0000?text=Mi
 
 export default function HomePage() {
   const { t } = useLanguage();
+  const { formatPrice } = useCurrency();
   const [products, setProducts] = useState<Product[]>([]);
 
   useEffect(() => {
@@ -34,19 +35,6 @@ export default function HomePage() {
       <HeroSlider />
 
       <CategoryShowcase />
-      {/* Horizontal Search Banner */}
-      <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-md">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-          <div className="space-y-1">
-            <span className="text-xs font-bold uppercase tracking-[0.2em] text-milwaukee">Hızlı Arama & Filtreleme</span>
-            <h2 className="text-xl sm:text-2xl font-bold text-slate-900">{t('Aramayı Hızlandır')}</h2>
-            <p className="text-xs text-slate-500 font-medium">{t('İhtiyacınız olan profesyonel Milwaukee ürün veya parça kodunu doğrudan bulun.')}</p>
-          </div>
-          <div className="w-full lg:max-w-xl">
-            <SearchBar />
-          </div>
-        </div>
-      </section>
 
       {/* Expansive Featured Products (Full Width) */}
       <section className="rounded-[32px] bg-white p-6 sm:p-8 shadow-[0_15px_45px_rgba(219,0,0,0.12)] border-2 border-milwaukee space-y-6">
@@ -109,7 +97,7 @@ export default function HomePage() {
               <div className="mt-3 sm:mt-5 flex items-end justify-between border-t border-slate-150 pt-3 sm:pt-4">
                 <div>
                   <span className="text-[9px] sm:text-[10px] uppercase font-bold text-slate-400 block mb-0.5">Fiyat</span>
-                  <p className="text-sm sm:text-lg font-black text-milwaukee">{product.price}</p>
+                  <p className="text-sm sm:text-lg font-black text-milwaukee">{formatPrice(product)}</p>
                 </div>
                 <span className="inline-flex items-center gap-1 rounded-lg bg-milwaukee/10 px-2 sm:px-3.5 py-1.5 sm:py-2 text-[10px] sm:text-xs font-bold text-milwaukee uppercase tracking-wider group-hover:bg-milwaukee group-hover:text-white transition">
                   <span className="hidden sm:inline">İncele</span> →

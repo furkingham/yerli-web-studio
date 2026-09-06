@@ -64,9 +64,9 @@ export default function Footer() {
         <div className="mx-auto max-w-screen-2xl px-4 lg:px-8">
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:grid-cols-5">
             <div className="col-span-2 space-y-4 sm:col-span-3 lg:col-span-5">
-              <Link href="/" className="inline-flex rounded-md bg-white px-3 py-2 shadow-sm">
+              <Link href="/" className="inline-flex">
                 <Image
-                  src="/kaswa-logo.png"
+                  src="/kaswa-logo-v2.png"
                   alt="Kaswa Makine Logo"
                   width={220}
                   height={147}

@@ -106,7 +106,7 @@ export default function AdminAuthPage() {
         <div className="flex flex-col items-center justify-center mb-8 text-center">
           <div className="h-16 w-16 bg-slate-900 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
             <Image
-              src="/kaswa-logo.png"
+              src="/kaswa-logo-v2.png"
               alt="Kaswa Makine"
               width={40}
               height={40}

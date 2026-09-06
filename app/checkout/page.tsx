@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useCart } from '../../components/CartContext';
+import { useCurrency } from '../../components/CurrencyContext';
 import { MapPin, ChevronDown, ChevronUp, CheckCircle, Home } from 'lucide-react';
 import { saveGlobalOrder } from '../../lib/orders';
 import { OrderItem, getCurrentUser, addOrderToCurrentUser, updateUserAddress } from '../../lib/auth';
@@ -11,6 +12,7 @@ import { iller, getIlceler } from '../../data/turkiye-lokasyonlari';
 
 export default function CheckoutPage() {
   const { cartItems, cartTotal, clearCart } = useCart();
+  const { formatPrice } = useCurrency();
   const [summaryOpen, setSummaryOpen] = useState(true);
   const [isNotTC, setIsNotTC] = useState(false);
   const [addressSaved, setAddressSaved] = useState(false);
@@ -574,7 +576,7 @@ export default function CheckoutPage() {
                             <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">MILWAUKEE</div>
                             <div className="text-xs text-slate-800 line-clamp-2 leading-snug my-0.5">{item.name}</div>
                             <div className="text-[10px] text-slate-500">{item.quantity} ADET</div>
-                            <div className="text-sm font-bold text-milwaukee mt-1">{item.price}</div>
+                            <div className="text-sm font-bold text-milwaukee mt-1">{formatPrice(item)}</div>
                           </div>
                         </div>
                       ))

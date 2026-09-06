@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { Minus, Plus, Heart, Share2, MessageSquare, Bell, Check, ShoppingCart, Star } from 'lucide-react';
 import ProductDetailTabs from './ProductDetailTabs';
 import { useLanguage } from './LanguageContext';
+import { useCurrency } from './CurrencyContext';
 import { useCart } from './CartContext';
 import { getProductRatingSummary } from '../lib/reviews';
 import type { Product } from '../data/products';
@@ -13,6 +14,7 @@ import type { Product } from '../data/products';
 export default function ProductView({ product }: { product: Product }) {
   const { t } = useLanguage();
   const { addToCart } = useCart();
+  const { formatPrice, calculatePriceTL } = useCurrency();
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
   const [favoriteAdded, setFavoriteAdded] = useState(false);
@@ -24,23 +26,21 @@ export default function ProductView({ product }: { product: Product }) {
     setRating({ averageRating: summary.averageRating, totalReviews: summary.totalReviews });
   }, [product.id]);
 
-  // Compute mock original list price for discount badge
-  const parsePrice = (priceStr: string) => {
-    const num = Number(priceStr.replace(/\./g, '').replace(' TL', '').replace(',', '.').trim()) || 1000;
-    return num;
-  };
-  const currentPriceNum = parsePrice(product.price);
-  const oldPriceNum = Math.round(currentPriceNum * 1.18);
-  const oldPriceFormatted = `${oldPriceNum.toLocaleString('tr-TR')} TL`;
+  const currentPriceTL = calculatePriceTL(product);
+  const oldPriceFormatted = new Intl.NumberFormat('tr-TR').format(Math.round(currentPriceTL * 1.15)) + ' TL';
 
   const handleAddToCart = () => {
     addToCart(product, quantity);
     setAdded(true);
-    setTimeout(() => setAdded(false), 2500);
+    setToastMsg(t('Ürün sepete eklendi!'));
+    setTimeout(() => {
+      setAdded(false);
+      setToastMsg('');
+    }, 3000);
   };
 
   const handleActionToast = (msg: string) => {
-    setToastMsg(msg);
+    setToastMsg(t(msg));
     setTimeout(() => setToastMsg(''), 3000);
   };
 
@@ -124,7 +124,7 @@ export default function ProductView({ product }: { product: Product }) {
               </div>
               <div className="flex items-baseline gap-3">
                 <span className="text-3xl sm:text-4xl font-black text-slate-900">
-                  {product.price}
+                  {formatPrice(product)}
                 </span>
                 <span className="text-xs font-medium text-slate-500">{t('KDV dahildir.')}</span>
               </div>
