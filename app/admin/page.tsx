@@ -12,6 +12,8 @@ import {
   generateSlug,
   type Campaign,
 } from '../../lib/admin';
+import { getManagedAdmins, saveManagedAdmins, type ManagedAdmin, type AdminRole } from '../../lib/admin-users';
+import { getCurrencyRates, saveCurrencyRates, priceFromCurrency, type CurrencyRates } from '../../lib/currency';
 import type { Product } from '../../data/products';
 import { useLanguage } from '../../components/LanguageContext';
 import {
@@ -31,7 +33,13 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 
-const categories = ['Akülü Aletler', 'El Aletleri', 'İş Güvenliği', 'Aksesuar'];
+const categories = [
+  'Akülü Aletler', 'M12 Serisi', 'M18 Serisi', 'L4+ Ürünleri',
+  'Matkaplar', 'Vidalama', 'Somun Sıkma', 'El Aletleri',
+  'Bıçaklar', 'Pançlar', 'Kesme ve Testereleme', 'Anahtarlar',
+  'Ölçüm Aletleri', 'Penseler ve Makaslar', 'Elmas Matkap Uçları',
+  'İş Güvenliği', 'Ayakkabılar', 'Aksesuar',
+];
 const voltages = ['12V', '18V', '24V'];
 const motorTypes = ['Kömürsüz', 'Kömürlü'];
 
@@ -77,6 +85,7 @@ const MENU_ITEMS = [
   { id: 'reviews', label: 'Yorumlar', icon: MessageSquare },
   { id: 'banks', label: 'Banka Hesapları', icon: CreditCard },
   { id: 'returns', label: 'İadeler', icon: RotateCcw },
+  { id: 'admins', label: 'Yönetici Kullanıcıları', icon: Users },
   { id: 'settings', label: 'Ayarlar', icon: Settings },
 ];
 
@@ -91,6 +100,10 @@ export default function AdminPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [newProduct, setNewProduct] = useState<ProductForm>(initialProductForm);
   const [newCampaign, setNewCampaign] = useState(initialCampaignForm);
+  const [managedAdmins, setManagedAdmins] = useState<ManagedAdmin[]>([]);
+  const [newAdminUsername, setNewAdminUsername] = useState('');
+  const [newAdminRole, setNewAdminRole] = useState<AdminRole>('Görüntüleme');
+  const [currencyRates, setCurrencyRates] = useState<CurrencyRates>({ eur: 45, usd: 41 });
   
   const { t } = useLanguage();
 
@@ -107,6 +120,8 @@ export default function AdminPage() {
     setAuthorized(true);
     setProducts(getAdminProducts());
     setCampaigns(getAdminCampaigns());
+    setManagedAdmins(getManagedAdmins());
+    setCurrencyRates(getCurrencyRates());
 
     // Load pending orders from global orders
     const allOrders = getGlobalOrders();
@@ -214,7 +229,7 @@ export default function AdminPage() {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-slate-100 via-white to-slate-200">
         <div className="mx-4 w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-8 shadow-xl text-center">
-          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-slate-900 shadow-lg">
+          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-[#db0000] shadow-lg">
             <Image
               src="/kaswa-logo-v2.png"
               alt="Kaswa Makine"
@@ -346,64 +361,149 @@ export default function AdminPage() {
     </div>
   );
 
+  const addManagedAdmin = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const username = newAdminUsername.trim();
+    if (!username) return;
+    if (managedAdmins.some((a) => a.username.toLocaleLowerCase('tr-TR') === username.toLocaleLowerCase('tr-TR'))) {
+      setMessage('Bu kullanıcı adı zaten kayıtlı.');
+      setTimeout(() => setMessage(null), 3000);
+      return;
+    }
+    const next = [...managedAdmins, { id: `admin-${Date.now()}`, username, role: newAdminRole, active: true, createdAt: new Date().toISOString().slice(0, 10) }];
+    setManagedAdmins(next);
+    saveManagedAdmins(next);
+    setNewAdminUsername('');
+    setMessage(`${username} admin listesine eklendi.`);
+    setTimeout(() => setMessage(null), 3000);
+  };
+
+  const toggleManagedAdmin = (id: string) => {
+    const next = managedAdmins.map((a) => a.id === id ? { ...a, active: !a.active } : a);
+    setManagedAdmins(next);
+    saveManagedAdmins(next);
+  };
+
+  const deleteManagedAdmin = (id: string) => {
+    const next = managedAdmins.filter((a) => a.id !== id);
+    setManagedAdmins(next);
+    saveManagedAdmins(next);
+  };
+
+  const handleRatesSave = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    saveCurrencyRates(currencyRates);
+    // Also update products that use EUR/USD base price
+    const updated = products.map((product) => ({
+      ...product,
+      price: priceFromCurrency(product.basePrice, product.currency as any, currencyRates) ?? product.price,
+    }));
+    persistProducts(updated);
+    window.dispatchEvent(new Event('exchange_rates_updated'));
+    setMessage('EUR/USD kurları kaydedildi; bağlı ürün fiyatları TL olarak güncellendi.');
+    setTimeout(() => setMessage(null), 3500);
+  };
+
+  const renderAdminsTab = () => (
+    <div className="space-y-6">
+      {message && <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/20 p-4 text-sm text-emerald-700 font-semibold">{message}</div>}
+
+      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 className="text-xl font-bold text-slate-900">Yönetici Kullanıcıları</h2>
+        <p className="mt-1 text-sm text-slate-500">Mevcut yöneticileri yönetin ve yeni panel kullanıcıları ekleyin.</p>
+        <form onSubmit={addManagedAdmin} className="mt-5 grid gap-3 sm:grid-cols-[1fr_220px_auto] sm:items-end">
+          <label className="block text-sm font-semibold text-slate-700">
+            Kullanıcı adı
+            <input required value={newAdminUsername} onChange={(e) => setNewAdminUsername(e.target.value)} placeholder="Yeni admin kullanıcı adı" className="mt-1 w-full rounded border border-slate-300 p-2.5 outline-none focus:border-milwaukee" />
+          </label>
+          <label className="block text-sm font-semibold text-slate-700">
+            Yetki seviyesi
+            <select value={newAdminRole} onChange={(e) => setNewAdminRole(e.target.value as AdminRole)} className="mt-1 w-full rounded border border-slate-300 p-2.5 outline-none focus:border-milwaukee">
+              <option>Süper Yönetici</option>
+              <option>Ürün Yöneticisi</option>
+              <option>Sipariş Yöneticisi</option>
+              <option>Görüntüleme</option>
+            </select>
+          </label>
+          <button type="submit" className="rounded bg-milwaukee px-4 py-2.5 font-bold text-white hover:bg-red-700 transition">Admin Ekle</button>
+        </form>
+      </div>
+
+      <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+        <table className="min-w-full text-sm text-slate-700">
+          <thead>
+            <tr className="border-b border-slate-200 bg-slate-50 text-left font-semibold">
+              <th className="p-4">Kullanıcı adı</th>
+              <th className="p-4">Yetki</th>
+              <th className="p-4">Eklenme Tarihi</th>
+              <th className="p-4">Durum</th>
+              <th className="p-4">İşlemler</th>
+            </tr>
+          </thead>
+          <tbody>
+            {managedAdmins.map((admin) => (
+              <tr key={admin.id} className="border-b border-slate-100 last:border-0">
+                <td className="p-4 font-semibold text-slate-900">{admin.username}</td>
+                <td className="p-4">{admin.role}</td>
+                <td className="p-4 text-slate-500">{admin.createdAt}</td>
+                <td className="p-4">
+                  <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${admin.active ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-500'}`}>
+                    {admin.active ? 'Aktif' : 'Pasif'}
+                  </span>
+                </td>
+                <td className="p-4 space-x-3">
+                  <button onClick={() => toggleManagedAdmin(admin.id)} className="font-semibold text-blue-600 hover:text-blue-800 transition">
+                    {admin.active ? 'Pasifleştir' : 'Aktifleştir'}
+                  </button>
+                  <button onClick={() => deleteManagedAdmin(admin.id)} className="font-semibold text-red-600 hover:text-red-800 transition">Sil</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+        ℹ️ Bu liste tarayıcı localStorage'ında saklanır. Gerçek erişim kontrolü için <code className="font-mono">.env.local</code> dosyasındaki <code className="font-mono">ADMIN_USER_*</code> değişkenlerini kullanın.
+      </div>
+    </div>
+  );
+
   const renderSettingsTab = () => (
     <div className="space-y-6">
       {message && <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/20 p-4 text-sm text-emerald-700 font-semibold">{message}</div>}
 
       {/* DÖVİZ KURU AYARLARI */}
-      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-xl font-bold text-slate-900 mb-6">Döviz Kuru Ayarları</h2>
-        <div className="space-y-4">
-          <p className="text-xs text-slate-500">Ürünlerde taban fiyatları Dolar veya Euro olan ürünlerin TL karşılıkları otomatik olarak bu kurlara göre hesaplanır.</p>
-          <div className="grid gap-4 md:grid-cols-2">
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1">USD (Dolar) Kuru (TL)</label>
-              <input 
-                type="number" 
-                step="0.01"
-                id="usd-rate-input"
-                defaultValue={(() => {
-                  try {
-                    const r = JSON.parse(localStorage.getItem('milwaukee_exchange_rates') || '{"USD":33.5,"EUR":36.8}');
-                    return r.USD;
-                  } catch { return 33.5; }
-                })()}
-                className="w-full rounded border border-slate-300 p-2 outline-none focus:border-blue-500" 
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1">EUR (Euro) Kuru (TL)</label>
-              <input 
-                type="number" 
-                step="0.01"
-                id="eur-rate-input"
-                defaultValue={(() => {
-                  try {
-                    const r = JSON.parse(localStorage.getItem('milwaukee_exchange_rates') || '{"USD":33.5,"EUR":36.8}');
-                    return r.EUR;
-                  } catch { return 36.8; }
-                })()}
-                className="w-full rounded border border-slate-300 p-2 outline-none focus:border-blue-500" 
-              />
-            </div>
-          </div>
-          <button 
-            type="button" 
-            onClick={() => {
-              const usd = parseFloat((document.getElementById('usd-rate-input') as HTMLInputElement).value);
-              const eur = parseFloat((document.getElementById('eur-rate-input') as HTMLInputElement).value);
-              if (usd > 0 && eur > 0) {
-                localStorage.setItem('milwaukee_exchange_rates', JSON.stringify({ USD: usd, EUR: eur }));
-                window.dispatchEvent(new Event('exchange_rates_updated')); // Global update
-                setMessage('Döviz kurları başarıyla güncellendi!');
-                setTimeout(() => setMessage(null), 3000);
-              }
-            }}
-            className="rounded bg-milwaukee px-4 py-2 font-semibold text-white hover:bg-red-700 transition"
-          >
-            Kurları Güncelle
+      <div className="rounded-xl border-2 border-milwaukee/20 bg-white p-6 shadow-sm">
+        <h2 className="text-xl font-bold text-slate-900 mb-1">Döviz Kurları ve Otomatik Fiyatlandırma</h2>
+        <p className="text-sm text-slate-500 mb-5">EUR veya USD baz fiyatı olan ürünlerin mağaza TL fiyatı bu kurlara göre güncellenir.</p>
+        <form onSubmit={handleRatesSave} className="grid gap-4 sm:grid-cols-3 sm:items-end">
+          <label className="block text-sm font-semibold text-slate-700">
+            1 USD / TL
+            <input
+              type="number"
+              min="0.01"
+              step="0.01"
+              value={currencyRates.usd}
+              onChange={(e) => setCurrencyRates({ ...currencyRates, usd: Number(e.target.value) })}
+              className="mt-1 w-full rounded border border-slate-300 p-2.5 outline-none focus:border-milwaukee"
+            />
+          </label>
+          <label className="block text-sm font-semibold text-slate-700">
+            1 EUR / TL
+            <input
+              type="number"
+              min="0.01"
+              step="0.01"
+              value={currencyRates.eur}
+              onChange={(e) => setCurrencyRates({ ...currencyRates, eur: Number(e.target.value) })}
+              className="mt-1 w-full rounded border border-slate-300 p-2.5 outline-none focus:border-milwaukee"
+            />
+          </label>
+          <button type="submit" className="rounded bg-milwaukee px-4 py-2.5 font-bold text-white hover:bg-red-700 transition">
+            Kurları Kaydet ve Fiyatları Güncelle
           </button>
-        </div>
+        </form>
       </div>
 
       {/* KAMPANYA AYARLARI */}
@@ -679,14 +779,16 @@ export default function AdminPage() {
             </button>
             <div className="flex items-center gap-1.5 sm:gap-3">
               <div className="flex items-center">
-                <Image
-                  src="/kaswa-logo-v2.png"
-                  alt="Kaswa Makine Logo"
-                  width={144}
-                  height={60}
-                  className="h-10 sm:h-12 w-auto object-contain"
-                  priority
-                />
+                <div className="flex items-center justify-center bg-[#db0000] rounded-lg overflow-hidden">
+                  <Image
+                    src="/kaswa-logo-v2.png"
+                    alt="Kaswa Makine Logo"
+                    width={144}
+                    height={60}
+                    className="h-10 sm:h-12 w-auto object-contain"
+                    priority
+                  />
+                </div>
               </div>
               <div className="h-6 w-px bg-slate-300"></div>
               <span className="text-[8px] sm:text-sm font-medium text-slate-500 leading-[1.1] sm:leading-normal w-[85px] sm:w-auto">
@@ -712,8 +814,9 @@ export default function AdminPage() {
             </h1>
             
             {activeTab === 'products' && renderProductsTab()}
+            {activeTab === 'admins' && renderAdminsTab()}
             {activeTab === 'settings' && renderSettingsTab()}
-            {activeTab !== 'products' && activeTab !== 'settings' && renderMockContent(activeTab)}
+            {activeTab !== 'products' && activeTab !== 'settings' && activeTab !== 'admins' && renderMockContent(activeTab)}
           </div>
         </div>
       </main>

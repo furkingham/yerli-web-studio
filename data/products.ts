@@ -1,3 +1,5 @@
+import { researchedProducts } from './researched-products';
+
 export type Voltage = '12V' | '18V' | '24V' | '';
 export type MotorType = 'Kömürsüz' | 'Kömürlü' | '';
 export type StockStatus = 'Stokta Var' | 'Kritik Stok' | 'Tükendi';
@@ -9,7 +11,7 @@ export interface Product {
   category: string;
   price: string;
   basePrice?: number;
-  currency?: 'TL' | 'USD' | 'EUR';
+  currency?: 'TRY' | 'USD' | 'EUR';
   voltage?: Voltage;
   motorType?: MotorType;
   batteryCapacity?: number | '';
@@ -17,13 +19,28 @@ export interface Product {
   stockStatus: StockStatus;
   stockQuantity: number;
   description?: string;
+  features?: string[];
   image?: string;
 }
 
 export const categories = [
   'Akülü Aletler',
+  'M12 Serisi',
+  'M18 Serisi',
+  'L4+ Ürünleri',
+  'Matkaplar',
+  'Vidalama',
+  'Somun Sıkma',
   'El Aletleri',
+  'Bıçaklar',
+  'Pançlar',
+  'Kesme ve Testereleme',
+  'Anahtarlar',
+  'Ölçüm Aletleri',
+  'Penseler ve Makaslar',
+  'Elmas Matkap Uçları',
   'İş Güvenliği',
+  'Ayakkabılar',
   'Aksesuar',
 ];
 
@@ -307,4 +324,5 @@ export const products: Product[] = [
     description: 'Çok yönlü uygulamalar için güçlü akülü araç; uzun süre performans sunar.',
     image: 'https://placehold.co/800x800/db0000/ffffff?text=M18+Çok+Amaçlı',
   },
+  ...researchedProducts,
 ];

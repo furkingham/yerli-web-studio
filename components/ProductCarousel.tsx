@@ -11,7 +11,19 @@ import { useLanguage } from './LanguageContext';
 import { useCart } from './CartContext';
 import { useCurrency } from './CurrencyContext';
 
-export default function ProductCarousel({ title, category }: { title: string, category?: string }) {
+export default function ProductCarousel({ 
+  title, 
+  category, 
+  categories,
+  limit = 20,
+  offset = 0,
+}: { 
+  title: string; 
+  category?: string; 
+  categories?: string[];
+  limit?: number;
+  offset?: number;
+}) {
   const { t } = useLanguage();
   const { addToCart } = useCart();
   const { formatPrice, calculatePriceTL } = useCurrency();
@@ -32,9 +44,13 @@ export default function ProductCarousel({ title, category }: { title: string, ca
     }
   };
 
-  const displayProducts = category 
-    ? products.filter(p => p.category === category)
-    : products;
+  const displayProducts = products
+    .filter((p) => {
+      if (category) return p.category === category;
+      if (categories && categories.length > 0) return categories.includes(p.category);
+      return true;
+    })
+    .slice(offset, offset + limit);
 
   return (
     <div className="w-full py-8">

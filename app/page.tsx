@@ -109,8 +109,13 @@ export default function HomePage() {
       </section>
 
       {/* Product Carousel Section */}
-      <ProductCarousel title="EL ALETİ & AKSESUAR" category="El Aletleri" />
-      <ProductCarousel title="YENİ ÜRÜNLER" />
+      <ProductCarousel
+        title="EL ALETİ & AKSESUAR"
+        categories={['El Aletleri', 'Bıçaklar', 'Pançlar', 'Anahtarlar', 'Ölçüm Aletleri', 'Penseler ve Makaslar', 'Kesme ve Testereleme', 'Vidalama']}
+        limit={12}
+      />
+      <ProductCarousel title="M18 SERİSİ ÜRÜNLER" categories={['M18 Serisi', 'Akülü Aletler']} limit={12} />
+      <ProductCarousel title="M12 SERİSİ ÜRÜNLER" categories={['M12 Serisi']} limit={12} />
 
     </div>
   );

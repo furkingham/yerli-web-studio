@@ -11,7 +11,7 @@ export type CartItem = {
   name: string;
   price: string;
   basePrice?: number;
-  currency?: 'TL' | 'USD' | 'EUR';
+  currency?: 'TRY' | 'USD' | 'EUR';
   image: string;
   quantity: number;
 };

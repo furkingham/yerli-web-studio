@@ -65,13 +65,15 @@ export default function Footer() {
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:grid-cols-5">
             <div className="col-span-2 space-y-4 sm:col-span-3 lg:col-span-5">
               <Link href="/" className="inline-flex">
-                <Image
-                  src="/kaswa-logo-v2.png"
-                  alt="Kaswa Makine Logo"
-                  width={220}
-                  height={147}
-                  className="h-16 w-auto object-contain"
-                />
+                <div className="inline-flex items-center justify-center bg-[#db0000] rounded-xl overflow-hidden p-1">
+                  <Image
+                    src="/kaswa-logo-v2.png"
+                    alt="Kaswa Makine Logo"
+                    width={220}
+                    height={147}
+                    className="h-16 w-auto object-contain"
+                  />
+                </div>
               </Link>
             </div>
 

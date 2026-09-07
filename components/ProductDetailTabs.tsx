@@ -92,6 +92,12 @@ export default function ProductDetailTabs({ product }: { product: Product }) {
               <p className="text-xs uppercase tracking-[0.2em] text-slate-400 font-semibold">Stok Durumu</p>
               <p className="mt-3 text-lg font-bold text-slate-800">{product.stockStatus}</p>
             </div>
+            {product.features?.map((feature) => (
+              <div key={feature} className="rounded-3xl bg-slate-50 border border-slate-100 p-5">
+                <p className="text-xs uppercase tracking-[0.2em] text-slate-400 font-semibold">Teknik Bilgi</p>
+                <p className="mt-3 text-sm font-bold text-slate-800">{feature}</p>
+              </div>
+            ))}
           </div>
         )}
 

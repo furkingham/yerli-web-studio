@@ -109,15 +109,17 @@ export default function Header() {
             <div className="flex items-center gap-2 lg:gap-8">
 
               {/* Logo */}
-              <Link href="/" className="flex-shrink-0 py-2 sm:py-3 flex items-center">
-                <Image
-                  src="/kaswa-logo-v2.png"
-                  alt="Kaswa Makine Logo"
-                  width={240}
-                  height={100}
-                  className="h-10 sm:h-14 w-auto object-contain"
-                  priority
-                />
+              <Link href="/" className="flex-shrink-0 flex items-center">
+                <div className="flex items-center justify-center bg-[#db0000] rounded-lg overflow-hidden">
+                  <Image
+                    src="/kaswa-logo-v2.png"
+                    alt="Kaswa Makine Logo"
+                    width={240}
+                    height={100}
+                    className="h-12 sm:h-16 w-auto object-contain"
+                    priority
+                  />
+                </div>
               </Link>
 
               {/* Divider */}
@@ -366,7 +368,7 @@ export default function Header() {
               </a>
             </div>
 
-            <div className="p-6 border-t border-slate-100 bg-slate-50 flex items-center gap-4">
+            <div className="p-6 border-t border-slate-100 bg-[#db0000] flex items-center gap-4">
               <Image
                 src="/kaswa-logo-v2.png"
                 alt="Kaswa Makina Logo"
